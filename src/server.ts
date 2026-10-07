@@ -70,7 +70,7 @@ import { type LinkIndex, linkifyReport, loadLinkIndexFile } from './reportLinks.
 import { buildReportScope, injectReportScope, type CodeManifest, type ScopeEntry } from './reportScope.ts';
 import { backfillFindingsIndex } from './reportIndex.ts';
 import { renderAuditHtml } from './auditReportHtml.ts';
-import { persistableSource, rehydratePersistedSource, connectionCredentials } from './sources/persist.ts';
+import { persistableSource, rehydratePersistedSource, connectionCredentials, redactUrlCredentials } from './sources/persist.ts';
 import { escapeHtml, envMcpSources, osvPublicOnly, measurePlaneIdentities, runBudget, effectiveRunBudget } from './run/shared.ts';
 import { loadAppSettings, saveRunBudget, SettingsError, rememberCredentials, setRememberCredentials, loadCredentials, saveCredentials } from './appSettings.ts';
 import { telemetryStatus, setTelemetryEnabled, markNoticeShown, telemetryNotice, TELEMETRY_FIELDS, examplePayload, track } from './telemetry.ts';
@@ -1262,7 +1262,7 @@ function connectWarehouse(body: any): Source {
   }
   const mcpUrl = String(body.mcpUrl || '').trim();
   if (!mcpUrl) throw new Error('Paste a BigQuery service-account key, or the URL of a read-only SQL MCP server.');
-  return { id, kind: 'warehouse', name: 'Warehouse SQL', status: 'ready', detail: mcpUrl, mcpUrl, mcpToken: String(body.mcpToken || '').trim() || undefined };
+  return { id, kind: 'warehouse', name: 'Warehouse SQL', status: 'ready', detail: redactUrlCredentials(mcpUrl).safe, mcpUrl, mcpToken: String(body.mcpToken || '').trim() || undefined };
 }
 // Read-only key-value / cache plane (e.g. a Redis MCP) — gives the Expert measure step a live KEY-VALUE
 // plane (catalog/pool sizes via ZCARD, set membership) for metrics the warehouse can't answer. Same shape
@@ -1271,7 +1271,7 @@ function connectKeyValue(body: any): Source {
   const id = 'src_' + randomBytes(3).toString('hex');
   const mcpUrl = String(body.mcpUrl || '').trim();
   if (!mcpUrl) throw new Error('MCP URL required.');
-  return { id, kind: 'keyvalue', name: 'Key-value (read-only)', status: 'ready', detail: mcpUrl, mcpUrl, mcpToken: String(body.mcpToken || '').trim() || undefined };
+  return { id, kind: 'keyvalue', name: 'Key-value (read-only)', status: 'ready', detail: redactUrlCredentials(mcpUrl).safe, mcpUrl, mcpToken: String(body.mcpToken || '').trim() || undefined };
 }
 
 // Generic read-only MCP data source (analytics / bi / custom) — Amplitude, Metabase, a product dashboard, any read-only MCP.
@@ -1309,7 +1309,7 @@ function connectMcp(body: any): Source {
     .map((t: unknown) => String(t).trim()).filter(Boolean);
   return {
     id, kind, name: label || ({ analytics: 'Analytics (MCP)', bi: 'BI & dashboards (MCP)', custom: 'Custom data (MCP)' })[kind],
-    status: 'ready', detail: `${mcpName} · ${mcpUrl}`, mcpUrl,
+    status: 'ready', detail: `${mcpName} · ${redactUrlCredentials(mcpUrl).safe}`, mcpUrl,
     mcpToken: String(body.mcpToken || '').trim() || undefined, mcpName,
     exposes: String(body.exposes || '').trim() || undefined,
     allowedTools: allowedTools.length ? allowedTools : undefined,
@@ -1369,7 +1369,7 @@ function publicSource(s: Source) {
   // prefill for round-trip editing / reconnect (fillMcpList reads mcpUrl) and the card can show the server name. The
   // bearer token is NEVER returned (write-only); mcpTokenRef is a secret NAME (a ref, not the value).
   if (s.kind === 'analytics' || s.kind === 'bi' || s.kind === 'custom') return {
-    ...base, mcpUrl: s.mcpUrl, mcpName: s.mcpName, exposes: s.exposes, allowedTools: s.allowedTools,
+    ...base, mcpUrl: s.mcpUrl === undefined ? undefined : redactUrlCredentials(s.mcpUrl).safe, mcpName: s.mcpName, exposes: s.exposes, allowedTools: s.allowedTools,
   };
   return base;
 }
@@ -1709,7 +1709,12 @@ const server = createServer(async (req, res) => {
             // kept the name but changed the URL, it's a NEW endpoint: carrying the old token would send it to a
             // different (possibly attacker-chosen) URL — a token disclosure.
             // A genuinely new MCP (no prior) likewise keeps connectMcp defaults.
-            if (!p || p.mcpUrl !== s.mcpUrl) continue;
+            if (!p) continue;
+            // The console only ever shows a credential-bearing URL in its redacted form, so re-saving the list posts that
+            // form back: map it to the full URL held in memory (same endpoint — the user did not change it).
+            const pSafe = redactUrlCredentials(p.mcpUrl);
+            if (pSafe.hadSecret && s.mcpUrl === pSafe.safe) { s.mcpUrl = p.mcpUrl; s.detail = p.detail; }
+            if (p.mcpUrl !== s.mcpUrl) continue;
             if (!s.mcpToken && p.mcpToken) s.mcpToken = p.mcpToken;
             if (s.allowedTools === undefined && p.allowedTools !== undefined) s.allowedTools = p.allowedTools;  // keep the host-side allowlist
             if (!s.exposes && p.exposes) s.exposes = p.exposes;                       // keep the plane-hint

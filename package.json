@@ -1,6 +1,6 @@
 {
   "name": "accel-scope",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Self-hosted AI code and data auditor: point it at your repos and data, get an evidence-backed report and a fix plan your coding agent can run.",
   "license": "Apache-2.0",
   "repository": {

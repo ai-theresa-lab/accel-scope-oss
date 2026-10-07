@@ -64,9 +64,9 @@ All connectors are read-only.
 | Private GitHub repos | A read-only personal access token. |
 | Local folders | A path on this machine, or a folder uploaded from the browser. |
 | BigQuery | A service-account key (JSON) with a read-only role. Queries are `SELECT`-only with a per-query scan cap. |
-| SQL warehouse / Redis / any MCP server | The URL of a read-only MCP server (and an optional bearer token). |
+| SQL warehouse / Redis / any MCP server | The URL of a read-only MCP server (and an optional bearer token). The agent may call every tool the server exposes unless you list the allowed tools, so connect read-only servers or read-only database users. |
 
-Connection credentials stay in memory unless you choose to remember them on this machine. Data planes are mounted only into runs you tick them for.
+Connection credentials (tokens, service-account keys, and credentials embedded in a connection URL) stay in memory unless you choose to remember them on this machine; they are never written to `state.json` or shown back in the console. Data planes are mounted only into runs you tick them for.
 
 ## Privacy and telemetry
 

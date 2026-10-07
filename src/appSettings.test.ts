@@ -64,3 +64,22 @@ test('connection credentials are remembered only when the setting is on, in a fi
   assert.deepEqual(loadCredentials(), {});
   assert.equal(JSON.parse(readFileSync(join(dir, 'settings.json'), 'utf8')).rememberCredentials, false);
 });
+
+test('a credential embedded in an MCP URL never reaches the persisted form; remembered, it comes back', async () => {
+  const { redactUrlCredentials } = await import('./sources/persist.ts');
+  const secret = 'p' + 'w' + 'X9z7Q2';
+  const url = `https://svc:${secret}@mcp.example.com/sse?region=us&api_key=${secret}`;
+  const r = redactUrlCredentials(url);
+  assert.equal(r.hadSecret, true);
+  assert.ok(!r.safe.includes(secret), r.safe);
+  assert.match(r.safe, /^https:\/\/mcp\.example\.com\/sse\?region=us&api_key=redacted$/);
+  assert.deepEqual(redactUrlCredentials('https://mcp.example.com/sse?region=us'), { safe: 'https://mcp.example.com/sse?region=us', hadSecret: false });
+  const src: Source = { id: 'src_9', kind: 'warehouse', name: 'Warehouse SQL', status: 'ready', detail: r.safe, mcpUrl: url };
+  const stored = persistableSource(src);
+  assert.ok(!JSON.stringify(stored).includes(secret), 'state.json form carries no secret');
+  assert.equal(stored.credStripped, true);
+  assert.equal(rehydratePersistedSource(stored).status, 'error', 'not remembered ⇒ reconnect');
+  const back = rehydratePersistedSource(stored, connectionCredentials(src));
+  assert.equal(back.status, 'ready');
+  assert.equal(back.mcpUrl, url, 'remembered ⇒ the full URL comes back');
+});
