@@ -31,15 +31,17 @@ COPY --from=repowise-builder /opt/repowise-venv /opt/repowise-venv
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
-# codex CLI (optional): with an OPENAI_API_KEY the report writers and QC judges run as an OpenAI coding agent and fall
-# back to Claude without it. It only ever authenticates with the key you configure (src/apiKeys.ts).
-ARG CODEX_VERSION=0.141.0
+# codex CLI (optional, not installed by default): codex's OS sandbox cannot start inside a container, and an unsandboxed
+# codex over scanned-repo content could read the OpenAI key, so the app does not run codex here (report writing uses the
+# OpenAI API and Claude instead). To include it anyway: --build-arg CODEX_VERSION=<version> and run with
+# THERESA_REPORT_CODEX_REQUIRE_SANDBOX=0 to accept the risk.
+ARG CODEX_VERSION=
 RUN if [ -n "$CODEX_VERSION" ]; then npm i -g "@openai/codex@${CODEX_VERSION}"; fi
 COPY src ./src
 
 # Inside the container the server listens on all interfaces; publish the port on 127.0.0.1 (as above) unless you
-# put your own authentication in front of it — the console has no login. codex's OS sandbox cannot start inside a
-# container, so it runs with the container itself as the boundary (THERESA_CODEX_NO_SANDBOX=1).
+# put your own authentication in front of it — the console has no login. THERESA_CODEX_NO_SANDBOX=1 tells the app that
+# codex's OS sandbox is unavailable here, so codex stays disabled (see above).
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=4317 THERESA_DATA_DIR=/data \
     THERESA_CODEX_NO_SANDBOX=1 THERESA_REPOWISE_BIN=/opt/repowise-venv/bin/repowise
 RUN mkdir -p /data && chown node:node /data

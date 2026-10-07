@@ -273,3 +273,12 @@ test('statedFindingCounts: the provenance banner share "0 of 8 findings measured
   assert.deepEqual(statedFindingCounts('<div>Generated · 0 of 8 findings measured against live systems</div><p>7 confirmed findings</p>'), [7]);
   assert.equal(findingCountCheck('<div>0 of 8 findings measured</div><p>7 findings</p>', 7), null);
 });
+
+test('findingCountCheck: a per-part breakdown is not a run total (parentheses / "in X" scope)', () => {
+  const brief = '<p>We confirmed 3 business issues: 2 in source connection, 1 in re-scan.</p>'
+    + '<p>Decide the release posture for source connection (2 confirmed issues, 1 high/critical).</p>'
+    + '<p>There are 2 issues in billing and 1 finding affecting checkout.</p>';
+  assert.deepEqual(statedFindingCounts(brief), [3]);
+  assert.equal(findingCountCheck(brief, 9, { business: 3, security: 4, engineering: 2 }), null, 'the self-scan brief was correct');
+  assert.ok(findingCountCheck('<p>We found 2 confirmed issues.</p>', 9, { business: 3, security: 4, engineering: 2 }), 'a wrong unqualified total still fires');
+});

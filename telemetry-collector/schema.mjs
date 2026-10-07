@@ -20,7 +20,7 @@ export const COST_BUCKETS = Object.freeze(['0', '<1', '1-5', '5-10', '10-30', '3
 export const SEVERITY_KEYS = Object.freeze(['critical', 'high', 'medium', 'low', 'info']);
 export const LENS_KEYS = Object.freeze(['business', 'security', 'engineering']);
 export const FINDINGS_KEYS = Object.freeze([...SEVERITY_KEYS, ...LENS_KEYS]);
-export const KEY_PROVIDERS = Object.freeze(['anthropic', 'anthropic+openai', 'claude-subscription', 'unknown']);
+export const KEY_PROVIDERS = Object.freeze(['anthropic', 'anthropic+openai', 'claude-subscription', 'claude-subscription+openai', 'unknown']);
 export const OUTCOMES = Object.freeze(['complete', 'error', 'stopped']);
 
 export const ID_LIST_RE = /^[a-z0-9-]{1,40}$/;

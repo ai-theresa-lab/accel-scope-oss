@@ -196,3 +196,20 @@ test('redactJson: secrets in leaves and under credential-named keys are redacted
   assert.equal(back.token_count, 5);
   assert.ok(!/hunter2|abcdefghijklmnop1234|ops@example/.test(out), out);
 });
+
+test('redactSecrets: Stripe underscore keys, Google OAuth, npm, Hugging Face tokens and Azure SAS signatures', () => {
+  // Fixtures are assembled at runtime so the source holds no token-shaped literal.
+  const cases: [string, RegExp][] = [
+    ['key ' + 'sk_' + 'live_' + 'a1B2c3D4e5F6g7H8i9J0' + ' end', /\[redacted-key\]/],
+    ['key ' + 'rk_' + 'live_' + 'a1B2c3D4e5F6g7H8i9J0' + ' end', /\[redacted-key\]/],
+    ['auth ' + 'ya29' + '.a0AfH6SMBx1234567890abcdefghijklmnop', /\[redacted-token\]/],
+    ['//registry/:_authToken=' + 'npm_' + 'A'.repeat(36), /\[redacted/],
+    ['token ' + 'hf_' + 'B'.repeat(34) + ' x', /\[redacted-token\]/],
+    ['https://acct.blob.core.windows.net/c/f?sv=2022-11-02&sig=' + 'C'.repeat(43) + '%3D&se=2026', /sig=\[redacted\]/],
+  ];
+  for (const [input, want] of cases) {
+    const out = redactSecrets(input);
+    assert.match(out, want, input.slice(0, 20));
+  }
+  assert.equal(redactSecrets('rk-detail and sk-ish words stay'), 'rk-detail and sk-ish words stay');
+});

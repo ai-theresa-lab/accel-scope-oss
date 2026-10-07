@@ -50,6 +50,11 @@ export function redactSecrets(input: string): string {
     .replace(/-----BEGIN[\s\S]{0,4000}?END[^-]{0,40}-----/gi, '[redacted-key-block]')             // PEM key blocks (bounded)
     .replace(/\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/g, '[redacted-jwt]') // JWTs
     .replace(/\bsk-(?:ant-|proj-|live-|test-)?[A-Za-z0-9_-]{16,}\b/gi, '[redacted-key]')           // sk-/sk-ant- secret keys (NOT pk-/rk-, which are public/legit ids)
+    .replace(/\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}\b/g, '[redacted-key]')                    // Stripe secret / restricted keys (underscore form)
+    .replace(/\bya29\.[A-Za-z0-9_-]{20,}/g, '[redacted-token]')                                    // Google OAuth access token
+    .replace(/\bnpm_[A-Za-z0-9]{30,}\b/g, '[redacted-token]')                                      // npm access token
+    .replace(/\bhf_[A-Za-z0-9]{30,}\b/g, '[redacted-token]')                                       // Hugging Face token
+    .replace(/([?&]sig=)[A-Za-z0-9%+/=]{20,}/g, '$1[redacted]')                                    // Azure SAS signature in a URL
     .replace(/\bAIzaSy[A-Za-z0-9_-]{20,}\b/g, '[redacted-key]')                                    // Google API key
     .replace(/\b(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]{16,}\b/g, '[redacted-token]')      // GitHub tokens
     .replace(/\bglpat-[A-Za-z0-9_-]{16,}\b/g, '[redacted-token]')                                  // GitLab PAT

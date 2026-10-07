@@ -33,6 +33,9 @@ export function restrictMemoryRepos(repos: string[] | undefined, allowed: string
   return { kept: kept.length ? kept : undefined, dropped: repos.filter((r) => !ok.has(key(r))) };
 }
 
+/** The tools the org-memory server exposes — also its host-side allowlist. */
+export const ORG_MEMORY_TOOLS = ['memory_recall', 'memory_write'] as const;
+
 // Build an in-process READ+WRITE org-memory MCP DataSource. Mounted under the `orgmemory` server name; the agent
 // calls mcp__orgmemory__{memory_recall,memory_write}. Never throws at mount — problems surface per-call as clear
 // text (fail-open) so a run degrades gracefully.
@@ -117,6 +120,8 @@ export function makeOrgMemorySource(opts: OrgMemorySourceOpts): DataSource {
     kind: 'memory',
     name: 'Org memory (read + write)',
     capabilities: { discover: false, query: true, metadata: false },
-    agentTools: (): SourceAgentTools => ({ mcpServers: { [serverName]: server } }),
+    // An explicit allowlist (not the "no policy ⇒ trust the whole server" default): the host-side gate then denies any
+    // tool on this server that is not named here, so a tool added to the server later is never trusted by accident.
+    agentTools: (): SourceAgentTools => ({ mcpServers: { [serverName]: server }, mcpToolPolicy: { [serverName]: [...ORG_MEMORY_TOOLS] } }),
   };
 }

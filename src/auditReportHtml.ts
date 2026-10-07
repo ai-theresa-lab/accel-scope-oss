@@ -111,7 +111,7 @@ code{color:#e8b873}
 </style>
 <div class="wrap">
 <h1>Run audit — flight recorder</h1>
-<p class="sub">${esc(meta.target || '')}${meta.runId ? ` · run ${esc(meta.runId)}` : ''}${meta.stamp ? ` · ${esc(meta.stamp)}` : ''} · full per-node input/output (internal; unredacted)</p>
+<p class="sub">${esc(meta.target || '')}${meta.runId ? ` · run ${esc(meta.runId)}` : ''}${meta.stamp ? ` · ${esc(meta.stamp)}` : ''} · full per-node input/output (secret-shaped values redacted)</p>
 <div class="cards">
 <div class="kv"><b>${nodes.length}</b><span>nodes (LLM leaves)</span></div>
 <div class="kv"><b>${usd(totalCost)}</b><span>total cost</span></div>

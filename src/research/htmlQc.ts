@@ -294,6 +294,11 @@ export function statedFindingCountsByLens(html: string): { n: number; lens?: Cou
   for (const m of text.matchAll(en)) {
     // "0 of 8 findings measured" (the provenance banner) is a share of all checks, not a finding count.
     if (/\bof\s+$/i.test(text.slice(Math.max(0, (m.index ?? 0) - 4), m.index))) continue;
+    // A BREAKDOWN, not a total: a count in parentheses ("… capability (2 confirmed issues, 1 high)") or scoped to a part
+    // of the product ("2 issues in billing", "1 finding affecting checkout"). Self-scan: a correct per-capability count
+    // in "Decisions needed" was flagged as a wrong run total.
+    if (/\(\s*$/.test(text.slice(Math.max(0, (m.index ?? 0) - 3), m.index))) continue;
+    if (/^\s+(?:in(?!\s+(?:total|all)\b)|for|within|under|affecting)\s/i.test(text.slice((m.index ?? 0) + m[0].length, (m.index ?? 0) + m[0].length + 12))) continue;
     const w = m[1].toLowerCase(); const lens = (m[2] ?? m[3])?.toLowerCase() as CountLens | undefined;
     out.push({ n: /^\d+$/.test(w) ? Number(w) : EN_NUM[w], ...(lens ? { lens } : {}) });
   }

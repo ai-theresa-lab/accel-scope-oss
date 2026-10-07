@@ -58,7 +58,7 @@ client payload must pass the collector validator unchanged).
 | `costBucket` | string | `0` \| `<1` \| `1-5` \| `5-10` \| `10-30` \| `30-100` \| `100+` (USD) |
 | `findings` | object | ints 0..100000 keyed by `critical, high, medium, low, info, business, security, engineering` |
 | `degradedStages` / `failedStages` | string[] | each `^[a-z0-9-]{1,40}$`, at most 20 |
-| `keyProvider` | string | `anthropic` \| `anthropic+openai` \| `claude-subscription` \| `unknown` |
+| `keyProvider` | string | `anthropic` \| `anthropic+openai` \| `claude-subscription` \| `claude-subscription+openai` \| `unknown` |
 | `outcome` | string | `complete` \| `error` \| `stopped` (optional) |
 | `ts` | string | ISO timestamp on the hour (`YYYY-MM-DDTHH:00:00.000Z`) |
 

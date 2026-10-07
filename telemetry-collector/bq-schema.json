@@ -26,6 +26,6 @@
   },
   { "name": "degradedStages", "type": "STRING", "mode": "REPEATED", "description": "Pipeline stages that fell back to a degraded path." },
   { "name": "failedStages", "type": "STRING", "mode": "REPEATED", "description": "Pipeline stages that failed." },
-  { "name": "keyProvider", "type": "STRING", "mode": "NULLABLE", "description": "anthropic | anthropic+openai | claude-subscription | unknown." },
+  { "name": "keyProvider", "type": "STRING", "mode": "NULLABLE", "description": "anthropic | anthropic+openai | claude-subscription | claude-subscription+openai | unknown." },
   { "name": "outcome", "type": "STRING", "mode": "NULLABLE", "description": "complete | error | stopped." }
 ]

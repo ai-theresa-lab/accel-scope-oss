@@ -8,7 +8,8 @@
 // machine" is ticked, which writes <data dir>/keys.json with mode 0600. Keys are never logged, never persisted
 // anywhere else, and only ever sent to the provider's own API.
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { writeSecretFile } from './secretFile.ts';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -26,7 +27,7 @@ export interface ApiKeyStatus {
   openai: KeyStatus;
   claudeLogin: boolean;                // a local `claude` CLI login exists (used when no Anthropic key is set)
   ready: boolean;                      // the agentic pipeline has a Claude credential
-  provider: 'anthropic' | 'anthropic+openai' | 'claude-subscription' | 'none';
+  provider: 'anthropic' | 'anthropic+openai' | 'claude-subscription' | 'claude-subscription+openai' | 'none';
   savedOnMachine: boolean;
 }
 
@@ -65,7 +66,7 @@ function writeSaved(keys: Partial<Record<KeyName, string>>): void {
   const file = keysFile();
   if (!keys.anthropic && !keys.openai) { try { rmSync(file, { force: true }); } catch { /* best-effort */ } return; }
   mkdirSync(dataDir(), { recursive: true });
-  writeFileSync(file, JSON.stringify(keys), { mode: 0o600 });
+  writeSecretFile(file, JSON.stringify(keys));
 }
 
 /** Is there a local `claude` CLI login the Agent SDK can fall back to? (presence check only — never read) */
@@ -102,7 +103,7 @@ export function provisionCodexAuth(): void {
     if (!key) { if (existsSync(authPath) && isManagedAuth(authPath)) rmSync(authPath, { force: true }); return; }
     if (existsSync(authPath) && !isManagedAuth(authPath)) return;   // never clobber a login someone created on purpose
     mkdirSync(home, { recursive: true, mode: 0o700 });
-    writeFileSync(authPath, JSON.stringify({ auth_mode: 'apikey', OPENAI_API_KEY: key }), { mode: 0o600 });
+    writeSecretFile(authPath, JSON.stringify({ auth_mode: 'apikey', OPENAI_API_KEY: key }));
   } catch (e) {
     console.log(JSON.stringify({ severity: 'WARNING', component: 'keys', event: 'codex-auth-failed', error: e instanceof Error ? e.message : String(e) }));
   }
@@ -120,7 +121,7 @@ export function apiKeyStatus(): ApiKeyStatus {
   const saved = readSaved();
   const provider: ApiKeyStatus['provider'] = a
     ? (o ? 'anthropic+openai' : 'anthropic')
-    : (claudeLogin ? 'claude-subscription' : 'none');
+    : (claudeLogin ? (o ? 'claude-subscription+openai' : 'claude-subscription') : 'none');
   return {
     anthropic: a ? { set: true, source: sources.anthropic ?? 'env', hint: mask(a), kind: a.startsWith('sk-ant-oat') ? 'oauth' : 'apikey' } : { set: false },
     openai: o ? { set: true, source: sources.openai ?? 'env', hint: mask(o) } : { set: false },

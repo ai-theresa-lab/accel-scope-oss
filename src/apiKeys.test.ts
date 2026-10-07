@@ -100,3 +100,12 @@ test('an auth file the user created on purpose is never overwritten', () => {
   setApiKeys({ openai: O });
   assert.equal(JSON.parse(readFileSync(join(dir, 'mine', 'auth.json'), 'utf8')).auth_mode, 'chatgpt');
 });
+
+test('a local claude login plus an OpenAI key is reported as claude-subscription+openai', async () => {
+  const { mkdirSync, writeFileSync } = await import('node:fs');
+  mkdirSync(process.env.CLAUDE_CONFIG_DIR!, { recursive: true });
+  writeFileSync(join(process.env.CLAUDE_CONFIG_DIR!, '.credentials.json'), '{}');
+  assert.equal(apiKeyStatus().provider, 'claude-subscription');
+  setApiKeys({ openai: O });
+  assert.equal(apiKeyStatus().provider, 'claude-subscription+openai');
+});

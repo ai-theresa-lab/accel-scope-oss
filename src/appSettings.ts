@@ -3,6 +3,7 @@
 // (src/apiKeys.ts, src/telemetry.ts); remembered connection credentials live in <data dir>/credentials.json (0600).
 
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { writeSecretFile } from './secretFile.ts';
 import { join } from 'node:path';
 import { runBudget, setRunBudget } from './run/shared.ts';
 
@@ -59,8 +60,7 @@ export function saveCredentials(byId: Record<string, Record<string, string>>): v
   if (!rememberCredentials() || !Object.keys(byId).length) { forgetCredentials(); return; }
   const file = credentialsFile();
   mkdirSync(dataDir(), { recursive: true });
-  writeFileSync(file + '.tmp', JSON.stringify(byId), { mode: 0o600 });
-  renameSync(file + '.tmp', file);
+  writeSecretFile(file, JSON.stringify(byId));
 }
 function forgetCredentials(): void {
   try { rmSync(credentialsFile(), { force: true }); } catch { /* best-effort */ }

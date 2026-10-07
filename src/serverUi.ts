@@ -1645,7 +1645,7 @@ export const SHELL_HELPERS_JS = String.raw`
     if(k.source==='settings') return what+' set in Settings — memory only, gone on restart';
     return what;
   }
-  function providerText(p){ return ({'anthropic':'your Anthropic key for every agent','anthropic+openai':'your Anthropic key, plus your OpenAI key for report writing / QC / translation','claude-subscription':'the Claude Code login found on this machine','none':'no Claude credential yet — add your Anthropic key'})[p]||'unknown'; }
+  function providerText(p){ return ({'anthropic':'your Anthropic key for every agent','anthropic+openai':'your Anthropic key, plus your OpenAI key for report writing and quality checks','claude-subscription':'the Claude Code login found on this machine','claude-subscription+openai':'the Claude Code login found on this machine, plus your OpenAI key for report writing and quality checks','none':'no Claude credential yet — add your Anthropic key'})[p]||'unknown'; }
   // Typical spend per run kind — shown in the + New chooser until this install has its own recent actuals.
   var TYPICAL_COST={ask:'~$0.3–1',scan:'~$5–30'};
   // UI-16 — a memory-history row's provenance line: the run id as an in-app link (data-act mem-open-run → /run?run=,

@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { reportCodexSandboxBlocked, reportCodexAvailable, writerOrder } from './htmlWriter.ts';
 import { codexAgentAvailable } from './codexAgent.ts';
 
-// THERESA_REPORT_CODEX_REQUIRE_SANDBOX=1 (opt-in, default OFF): with no OS sandbox
-// (THERESA_CODEX_NO_SANDBOX=1, i.e. Cloud Run) the report pipeline must never run codex unsandboxed — the writers
+// By default, with no OS sandbox (THERESA_CODEX_NO_SANDBOX=1, i.e. a container) the report pipeline never runs codex
+// unsandboxed; only THERESA_REPORT_CODEX_REQUIRE_SANDBOX=0 opts in to the risk. The writers
 // route to Claude and the codex file-task / QC steps to the tool-free gpt fallback. These hold whether or not the codex CLI is installed on the test machine.
 
 const KEYS = ['THERESA_REPORT_CODEX_REQUIRE_SANDBOX', 'THERESA_CODEX_NO_SANDBOX', 'THERESA_REPORT_WRITER', 'THERESA_QC_JUDGE'] as const;
@@ -18,11 +18,11 @@ function withEnv(env: Partial<Record<(typeof KEYS)[number], string | undefined>>
   }
 }
 
-test('the sandbox requirement blocks codex only when it is required AND no OS sandbox exists', () => {
+test('without an OS sandbox codex is blocked by default; only an explicit =0 allows it', () => {
+  withEnv({ THERESA_CODEX_NO_SANDBOX: '1' }, () => assert.equal(reportCodexSandboxBlocked(), true));                      // default: blocked
   withEnv({ THERESA_REPORT_CODEX_REQUIRE_SANDBOX: '1', THERESA_CODEX_NO_SANDBOX: '1' }, () => assert.equal(reportCodexSandboxBlocked(), true));
-  withEnv({ THERESA_REPORT_CODEX_REQUIRE_SANDBOX: '1' }, () => assert.equal(reportCodexSandboxBlocked(), false));        // local: real sandbox
-  withEnv({ THERESA_CODEX_NO_SANDBOX: '1' }, () => assert.equal(reportCodexSandboxBlocked(), false));                     // default OFF: today's behaviour
-  withEnv({ THERESA_REPORT_CODEX_REQUIRE_SANDBOX: '0', THERESA_CODEX_NO_SANDBOX: '1' }, () => assert.equal(reportCodexSandboxBlocked(), false));
+  withEnv({ THERESA_REPORT_CODEX_REQUIRE_SANDBOX: '0', THERESA_CODEX_NO_SANDBOX: '1' }, () => assert.equal(reportCodexSandboxBlocked(), false)); // explicit opt-in
+  withEnv({}, () => assert.equal(reportCodexSandboxBlocked(), false));                                                    // local: codex's own sandbox works
 });
 
 test('when blocked, every report-pipeline codex path takes its codex-less route', () => {

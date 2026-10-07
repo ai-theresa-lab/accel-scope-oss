@@ -27,7 +27,7 @@ export const COST_BUCKETS = ['0', '<1', '1-5', '5-10', '10-30', '30-100', '100+'
 export const SEVERITY_KEYS = ['critical', 'high', 'medium', 'low', 'info'] as const;
 export const LENS_KEYS = ['business', 'security', 'engineering'] as const;
 export const FINDINGS_KEYS = [...SEVERITY_KEYS, ...LENS_KEYS] as const;
-export const KEY_PROVIDERS = ['anthropic', 'anthropic+openai', 'claude-subscription', 'unknown'] as const;
+export const KEY_PROVIDERS = ['anthropic', 'anthropic+openai', 'claude-subscription', 'claude-subscription+openai', 'unknown'] as const;
 export const OUTCOMES = ['complete', 'error', 'stopped'] as const;
 
 export const ID_LIST_RE = /^[a-z0-9-]{1,40}$/;
@@ -109,7 +109,7 @@ export const TELEMETRY_FIELDS: ReadonlyArray<{ name: keyof TelemetryEvent; descr
   { name: 'findings', description: 'Counts of findings by severity (critical/high/medium/low/info) and by lens (business/security/engineering). Never finding text.' },
   { name: 'degradedStages', description: 'Built-in pipeline stage names that fell back to a degraded path.' },
   { name: 'failedStages', description: 'Built-in pipeline stage names that failed.' },
-  { name: 'keyProvider', description: 'Which kind of model credential was used: anthropic, anthropic+openai, claude-subscription or unknown. Never the key.' },
+  { name: 'keyProvider', description: 'Which kind of model credential was used: anthropic, anthropic+openai, claude-subscription, claude-subscription+openai or unknown. Never the key.' },
   { name: 'outcome', description: 'How the run ended: complete, error or stopped.' },
   { name: 'ts', description: 'Event time rounded down to the hour (UTC).' },
 ];

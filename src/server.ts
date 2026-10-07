@@ -733,8 +733,11 @@ function finishRun(run: Run, result: MinerResult, costUsdRaw: number | null, wor
   reportRunTelemetry(run, 'complete', result.findings);
   pumpHeavyRuns();   // terminal transition — a heavy slot may have freed; promote the next queued heavy run
 }
-function failRun(run: Run, msg: string): void {
+function failRun(run: Run, msgRaw: string): void {
   if (liveRun(run).stopRequested) return stopRun(run);   // a user stop unwound the pipeline as a throw — render 'stopped', not 'error'
+  // An error message can carry text from a provider / connector response: redact it before it reaches the run record,
+  // state.json, stdout and the SSE stream.
+  const msg = redactSecrets(msgRaw);
   updateRun(run, (r) => {
     r.status = 'error'; r.error = msg; r.log.push('error: ' + msg);
     console.log(JSON.stringify({ severity: 'ERROR', component: 'run', run: r.id, tenant: r.tenant, event: 'error', error: msg }));

@@ -32,16 +32,14 @@ export function codexAvailable(): boolean {
   return _codexOk;
 }
 
-// OPT-IN "no codex without an OS sandbox" for the REPORT pipeline (THERESA_REPORT_CODEX_REQUIRE_SANDBOX=1,
-// default OFF). On Cloud Run (THERESA_CODEX_NO_SANDBOX=1, gVisor) every report-pipeline codex call runs with
-// --dangerously-bypass-approvals-and-sandbox over scanned-repo-derived content with CODEX_HOME/auth.json readable — a
-// key-exfil surface (the OpenAI key on disk, reachable by an unsandboxed agent over untrusted repos). With the flag set
-// and no OS sandbox, codex is treated as UNAVAILABLE for reports, so each call site takes its existing codex-less path:
-// the HTML writers use the Claude writer (writerOrder → ['claude']), the codex file-task steps and
-// the html-QC judge use the tool-free gpt-5.5 fallback, and reconcile is skipped (recorded as a degradation).
-// Default OFF keeps today's deployed behaviour; the residual risk while OFF is that codex runs unsandboxed.
+// "No codex without an OS sandbox" — ON by default. Where codex's OS sandbox cannot start (a container:
+// THERESA_CODEX_NO_SANDBOX=1, set in the Docker image) a codex call would have to run with
+// --dangerously-bypass-approvals-and-sandbox over content derived from the scanned repo while CODEX_HOME/auth.json (the
+// OpenAI key) is readable — a prompt-injected run could exfiltrate the key. So in that case codex is treated as
+// UNAVAILABLE and every call site takes its codex-less path: the HTML writers use Claude, the file-task steps use the
+// tool-free gpt-5.5 call. THERESA_REPORT_CODEX_REQUIRE_SANDBOX=0 explicitly accepts the risk and allows unsandboxed codex.
 export function reportCodexSandboxBlocked(): boolean {
-  return process.env.THERESA_REPORT_CODEX_REQUIRE_SANDBOX === '1' && process.env.THERESA_CODEX_NO_SANDBOX === '1';
+  return process.env.THERESA_CODEX_NO_SANDBOX === '1' && process.env.THERESA_REPORT_CODEX_REQUIRE_SANDBOX !== '0';
 }
 // codex availability as the REPORT pipeline sees it: the CLI is installed AND the sandbox requirement is met.
 export function reportCodexAvailable(): boolean {

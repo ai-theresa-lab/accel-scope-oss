@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { AuditRecorder, withAuditRun, withAuditContext, currentAuditRecorder, readAuditLeaves, calledMcpServers, type AuditLeaf } from './auditLog.ts';
@@ -95,4 +95,15 @@ test('renderAuditHtml: escapes HTML in prompts/responses (no raw injection)', ()
   assert.match(html, /&lt;script&gt;/);
   assert.doesNotMatch(html, /<script>alert/);
   assert.match(html, /a &amp; b/);
+});
+
+test('AuditRecorder: secret-shaped values never reach the audit file (prompt, response, tool args)', () => {
+  const p = tmpJsonl();
+  const tok = 'ghp' + '_' + 'A'.repeat(36);   // assembled so the source holds no token-shaped literal
+  new AuditRecorder(p).record({ kind: 'agent', label: 'leak', prompt: `export GITHUB_TOKEN=${tok}`, response: `found ${tok}`, toolCalls: [{ name: 'Read', args: `{"q":"${tok}"}` }] });
+  const raw = readFileSync(p, 'utf8');
+  assert.ok(!raw.includes(tok), 'the raw JSONL carries no token');
+  const [l] = readAuditLeaves(p);
+  assert.match(l.prompt!, /redacted/);
+  assert.doesNotMatch(renderAuditHtml([l], { runId: 'r' }), new RegExp(tok));
 });

@@ -10,12 +10,13 @@
 //
 // Persistence: each leaf is appended (sync, ordered, crash-safe) as one JSON line to a JSONL sidecar on disk
 // (the source of truth — NOT an unbounded in-memory array). Leaf COUNT is bounded by the fan-out caps
-// (~30-40/run); each prompt/response/tool-arg is capped (generous, with a `[truncated N]` marker). The owner
-// chose FULL/unredacted capture for completeness (internal artifact, never served on /share).
+// (~30-40/run); each prompt/response/tool-arg is capped (generous, with a `[truncated N]` marker). The log
+// captures full prompts/responses for completeness, with secret-shaped values redacted on write (redactJson).
 
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { appendFileSync, readFileSync } from 'node:fs';
 import { currentBudgetNode } from './budget.ts';
+import { redactJson } from './reportEvidence.ts';
 
 export interface AuditToolCall { name: string; args: string }
 export type AuditKind = 'agent' | 'openai' | 'deterministic' | 'meta';
@@ -84,7 +85,9 @@ export class AuditRecorder {
   private append(leaf: Partial<AuditLeaf>): void {
     try {
       const full: AuditLeaf = { seq: this.seq++, ts: Date.now(), kind: leaf.kind ?? 'agent', ...leaf } as AuditLeaf;
-      appendFileSync(this.jsonlPath, JSON.stringify(full) + '\n');
+      // Prompts, responses and tool arguments carry text from the scanned code: redact secret-shaped values before they
+      // reach disk (the audit HTML is rendered from this file, so it inherits the redaction).
+      appendFileSync(this.jsonlPath, redactJson(full) + '\n');
     } catch { /* fail-open: a logging failure never breaks a run */ }
   }
 }

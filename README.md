@@ -90,7 +90,7 @@ What is sent (and nothing else):
 | `connectorKinds` | The kinds of sources a run used (e.g. `github`, `warehouse`). |
 | `findings` | Counts by severity and by lens. |
 | `degradedStages`, `failedStages` | Names of built-in pipeline stages that fell back or failed. |
-| `keyProvider` | Which kind of key was configured (`anthropic`, `anthropic+openai`, `claude-subscription`). |
+| `keyProvider` | Which kind of key was configured (`anthropic`, `anthropic+openai`, `claude-subscription`, `claude-subscription+openai`). |
 | `ts` | The time, rounded to the hour. |
 
 Never sent: repository names or URLs, code, file paths, questions or briefs, finding text, reports, keys, emails, hostnames or usernames. The collector does not record IP addresses. Its source is in [`telemetry-collector/`](telemetry-collector/).

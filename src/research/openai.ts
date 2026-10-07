@@ -9,6 +9,7 @@ import { recordLlmCost, currentLedger, currentBudgetNode } from './budget.ts';
 import { BUDGET_SKIP_MARKER } from './agent.ts';
 import { currentAuditRecorder } from './auditLog.ts';
 import { openaiCostUsd, chatUsage } from './openaiPricing.ts';
+import { redactSecrets } from './reportEvidence.ts';
 
 const DEFAULT_MODEL = 'gpt-5.5';
 // Cost: priced from the response's usage + model against the shared table (openaiPricing.ts) and recorded to the run
@@ -67,7 +68,7 @@ export async function openaiComplete(opts: { prompt: string; model?: string; max
             headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
             body: JSON.stringify(body),
           });
-          if (!res.ok) { const t = await res.text().catch(() => ''); throw new Error(`OpenAI ${res.status}: ${t.slice(0, 300)}`); }
+          if (!res.ok) { const t = await res.text().catch(() => ''); throw new Error(`OpenAI ${res.status}: ${redactSecrets(t.slice(0, 300))}`); }   // the body can echo request details: redact before it reaches run logs
           const j = await res.json() as any;
           const text = j?.choices?.[0]?.message?.content;
           if (typeof text !== 'string' || !text.trim()) throw new Error('OpenAI returned no text content');
@@ -82,7 +83,7 @@ export async function openaiComplete(opts: { prompt: string; model?: string; max
           const msg = e instanceof Error ? e.message : String(e);
           if (attempt >= OPENAI_ATTEMPTS || !isRetryableOpenAiError(msg)) throw e;   // out of retries or non-transient → give up
           const backoff = Math.min(8000, 500 * 2 ** (attempt - 1)) + Math.floor(Math.random() * 300);   // 0.5s,1s,2s… + jitter
-          opts.log?.(`  ↳ openai ${model} attempt ${attempt}/${OPENAI_ATTEMPTS} failed (${msg.slice(0, 90)}) — retrying in ${backoff}ms`);
+          opts.log?.(`  ↳ openai ${model} attempt ${attempt}/${OPENAI_ATTEMPTS} failed (${redactSecrets(msg).slice(0, 90)}) — retrying in ${backoff}ms`);
           await new Promise((r) => setTimeout(r, backoff));
         }
       }
