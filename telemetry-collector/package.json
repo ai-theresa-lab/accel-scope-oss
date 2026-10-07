@@ -1,0 +1,18 @@
+{
+  "name": "accel-scope-telemetry-collector",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Anonymous usage telemetry collector for accel-scope (Cloud Run + BigQuery).",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^8.3.1"
+  }
+}

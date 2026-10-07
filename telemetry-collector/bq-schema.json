@@ -1,0 +1,31 @@
+[
+  { "name": "receivedDate", "type": "DATE", "mode": "REQUIRED", "description": "Server-side UTC date the event was received (partition column)." },
+  { "name": "ts", "type": "TIMESTAMP", "mode": "REQUIRED", "description": "Client event time, rounded down to the hour." },
+  { "name": "installId", "type": "STRING", "mode": "REQUIRED", "description": "Random UUID v4 generated once per install." },
+  { "name": "version", "type": "STRING", "mode": "REQUIRED", "description": "App version." },
+  { "name": "os", "type": "STRING", "mode": "REQUIRED", "description": "process.platform." },
+  { "name": "arch", "type": "STRING", "mode": "REQUIRED", "description": "process.arch." },
+  { "name": "node", "type": "INTEGER", "mode": "REQUIRED", "description": "Node.js major version." },
+  { "name": "event", "type": "STRING", "mode": "REQUIRED", "description": "start | quick-ask | full-scan | incremental." },
+  { "name": "bundles", "type": "STRING", "mode": "REPEATED", "description": "Built-in expert bundle ids that ran." },
+  { "name": "connectorKinds", "type": "STRING", "mode": "REPEATED", "description": "Kinds of connected sources (fixed allowlist)." },
+  { "name": "durationSec", "type": "INTEGER", "mode": "NULLABLE", "description": "Run duration in whole seconds." },
+  { "name": "costBucket", "type": "STRING", "mode": "NULLABLE", "description": "0 | <1 | 1-5 | 5-10 | 10-30 | 30-100 | 100+ (USD)." },
+  {
+    "name": "findings", "type": "RECORD", "mode": "NULLABLE", "description": "Finding counts by severity and by lens.",
+    "fields": [
+      { "name": "critical", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "high", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "medium", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "low", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "info", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "business", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "security", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "engineering", "type": "INTEGER", "mode": "NULLABLE" }
+    ]
+  },
+  { "name": "degradedStages", "type": "STRING", "mode": "REPEATED", "description": "Pipeline stages that fell back to a degraded path." },
+  { "name": "failedStages", "type": "STRING", "mode": "REPEATED", "description": "Pipeline stages that failed." },
+  { "name": "keyProvider", "type": "STRING", "mode": "NULLABLE", "description": "anthropic | anthropic+openai | claude-subscription | unknown." },
+  { "name": "outcome", "type": "STRING", "mode": "NULLABLE", "description": "complete | error | stopped." }
+]

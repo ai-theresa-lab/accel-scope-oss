@@ -1,0 +1,11 @@
+# gitleaks config: the default rules, plus an allowlist for the two redaction test suites, whose fixtures are
+# deliberately secret-shaped (fake) strings that the redactor must catch.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "fake secret-shaped fixtures in redaction tests"
+paths = [
+  '''src/research/reportEvidence\.test\.ts$''',
+  '''src/scopedTemplateHtml\.test\.ts$''',
+]

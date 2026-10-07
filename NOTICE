@@ -1,0 +1,20 @@
+accel-scope
+Copyright 2026 AI Theresa
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party components
+----------------------
+
+accel-scope does not vendor any third-party code. It installs or invokes the following components, each under its own
+license:
+
+- @anthropic-ai/claude-agent-sdk (npm dependency) — governed by Anthropic's terms
+  (https://www.anthropic.com/legal). It is installed from npm by `npm ci`; use of the Claude API is subject to your
+  agreement with Anthropic.
+- @google-cloud/bigquery (npm dependency) — Apache License 2.0.
+- zod (npm dependency) — MIT License.
+- @openai/codex (optional; installed in the Docker image, or by you) — Apache License 2.0. Invoked as a subprocess.
+- repowise (optional; not installed by default) — GNU Affero General Public License v3.0. Invoked strictly as a
+  separate subprocess when THERESA_CODEINTEL=1; never linked or vendored.
+- git (system dependency) — GNU General Public License v2.0. Invoked as a subprocess.

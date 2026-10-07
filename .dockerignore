@@ -1,0 +1,14 @@
+node_modules
+out
+.data
+.data*
+.git
+.github
+*.md
+!README.md
+Dockerfile
+.dockerignore
+telemetry-collector
+clients
+.env
+.env.*
