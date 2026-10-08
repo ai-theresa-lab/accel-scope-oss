@@ -44,7 +44,7 @@ test('glob patterns may not leave the analysis directory', () => {
   const root = resolve('/ws/repo');
   const inside = [`${root}/**/*.ts`, `${root}/src/*.{js,ts}`];
   for (const g of ['**/*.ts', 'src/**', '*.{js,ts}', 'a..b/*', '...', ...inside]) assert.equal(globWithinDir(g, root), true, g);
-  for (const g of ['../**', 'src/../../**', '/etc/*', '~/.ssh/*', 'C:/Users/**', '..\\x\\*', '{..,src}/**', '..', `${root}/../other/**`, resolve('/ws') + '/*']) {
+  for (const g of ['../**', 'src/../../**', '/etc/*', '~/.ssh/*', ...(process.platform === 'win32' ? ['C:/Users/**'] : []), '..\\x\\*', '{..,src}/**', '..', `${root}/../other/**`, resolve('/ws') + '/*']) {
     assert.equal(globWithinDir(g, root), false, g);
   }
 });
