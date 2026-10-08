@@ -7,9 +7,6 @@
 
 **Waggle audits a codebase (and, optionally, the data behind it) the way a careful reviewer would: it states falsifiable hypotheses, measures them against the code and data, lets an adversarial auditor attack every claim, and reports only what survives — with the evidence attached.**
 
-> [!NOTE]
-> Waggle was previously released as **accel-scope**. The name comes from the honeybee's *waggle dance*: a scout explores, comes back, and tells the hive exactly where to look. Waggle is self-hosted, single-user, runs on your own model keys, and never writes to the code or data it inspects.
-
 ![Waggle console](docs/screenshot.png)
 
 **Contents:** [Overview](#overview) · [Method](#method) · [Quick start](#quick-start) · [Usage](#usage) · [Expert lenses](#expert-lenses) · [Connectors](#connectors) · [Privacy and telemetry](#privacy-and-telemetry) · [Limitations](#limitations-and-threats-to-validity) · [Contributors](#contributors) · [Citation](#citation)
