@@ -1,7 +1,7 @@
-# 🐝 Waggle
+# <img src="docs/logo.png" width="44" align="center" alt="AI Theresa Waggle logo"> AI Theresa Waggle
 
-[![Test](https://github.com/ai-theresa-lab/waggle/actions/workflows/test.yml/badge.svg)](https://github.com/ai-theresa-lab/waggle/actions/workflows/test.yml)
-[![Release](https://img.shields.io/github/v/release/ai-theresa-lab/waggle)](https://github.com/ai-theresa-lab/waggle/releases)
+[![Test](https://github.com/ai-theresa-lab/ai-theresa-waggle/actions/workflows/test.yml/badge.svg)](https://github.com/ai-theresa-lab/ai-theresa-waggle/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/ai-theresa-lab/ai-theresa-waggle)](https://github.com/ai-theresa-lab/ai-theresa-waggle/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A522.7-339933)](package.json)
 
@@ -79,7 +79,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module-level design.
 Requirements: Node.js 22.7+ and git.
 
 ```bash
-git clone https://github.com/ai-theresa-lab/waggle.git && cd waggle
+git clone https://github.com/ai-theresa-lab/ai-theresa-waggle.git && cd ai-theresa-waggle
 npm ci
 ANTHROPIC_API_KEY=sk-ant-... npm start
 ```
@@ -238,7 +238,7 @@ If you use Waggle in research or a write-up, please cite:
   title  = {{Waggle}: Evidence-Gated, Hypothesis-Driven Auditing of Code and Data with LLM Agents},
   author = {{AI Theresa}},
   year   = {2026},
-  url    = {https://github.com/ai-theresa-lab/waggle},
+  url    = {https://github.com/ai-theresa-lab/ai-theresa-waggle},
   note   = {Formerly accel-scope}
 }
 ```
