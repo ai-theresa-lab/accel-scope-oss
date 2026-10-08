@@ -66,7 +66,7 @@ test('executionGroups: by synthesis theme (not by bundle); budget-skipped checks
 test('Execution report: Work plan / Findings / Appendix, per-finding fix · done when · verify, no answer-back (leadership owns it)', () => {
   const html = renderFindingsHtml({ miner: 'org-aggregate', target: 'organization · umami', metrics: { summary: { org: true } }, findings, coverageGaps: gaps,
     answerBack: [{ concern: 'Are metrics consistent?', status: 'supported' } as never], execution: model() }, '2026-09-27T00:00:00Z', false, 'check metrics');
-  assert.match(html, /<title>accel-scope · organization · umami · execution report<\/title>/);
+  assert.match(html, /<title>Waggle · organization · umami · execution report<\/title>/);
   assert.match(html, /data-tab="overview">Work plan</); assert.match(html, /data-tab="evidence">Appendix</);
   assert.match(html, /<h2>KPI definition integrity<\/h2><span class="tagx"[^>]*>Critical<\/span>/);
   assert.match(html, /Needs a test · 1 open question in this area/);

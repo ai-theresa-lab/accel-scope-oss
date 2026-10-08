@@ -1,4 +1,4 @@
-// accel-scope CLI: run the git-history miner on a target repo and emit both
+// Waggle CLI: run the git-history miner on a target repo and emit both
 // the structured evidence layer (evidence.json) and the v0 markdown report.
 //
 // Usage:  npm run analyze -- <path-to-repo> [--out <dir>]
@@ -29,7 +29,7 @@ if (!(await isGitRepo(target))) {
 }
 
 const stamp = new Date().toISOString();
-console.log(`▶ accel-scope: mining git history of ${target} …`);
+console.log(`▶ Waggle: mining git history of ${target} …`);
 const result = await mineGitHistory(target);
 
 const outDir = resolve(outFlag ?? join(process.cwd(), 'out', basename(target)));

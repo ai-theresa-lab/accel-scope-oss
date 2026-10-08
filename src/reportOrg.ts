@@ -19,7 +19,7 @@ export function renderOrgReport(result: OrgResult, stamp: string): string {
   const findings = [...result.findings].sort((a, b) => SEV_ORDER[a.severity] - SEV_ORDER[b.severity]);
 
   const out: string[] = [];
-  out.push('# accel-scope · org-wide diagnostic');
+  out.push('# Waggle · org-wide diagnostic');
   out.push('');
   out.push(`**Org root:** \`${result.target}\`  `);
   out.push(`**Generated:** ${stamp}  `);

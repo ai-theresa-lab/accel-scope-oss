@@ -1,11 +1,11 @@
 {
-  "name": "accel-scope",
-  "version": "0.1.1",
+  "name": "waggle",
+  "version": "0.1.2",
   "description": "Self-hosted AI code and data auditor: point it at your repos and data, get an evidence-backed report and a fix plan your coding agent can run.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ai-theresa-lab/accel-scope-oss.git"
+    "url": "https://github.com/ai-theresa-lab/waggle.git"
   },
   "type": "module",
   "engines": {

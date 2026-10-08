@@ -8,6 +8,7 @@
 // machine" is ticked, which writes <data dir>/keys.json with mode 0600. Keys are never logged, never persisted
 // anywhere else, and only ever sent to the provider's own API.
 
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { writeSecretFile } from './secretFile.ts';
 import { homedir } from 'node:os';
@@ -69,10 +70,25 @@ function writeSaved(keys: Partial<Record<KeyName, string>>): void {
   writeSecretFile(file, JSON.stringify(keys));
 }
 
-/** Is there a local `claude` CLI login the Agent SDK can fall back to? (presence check only — never read) */
+/**
+ * Is there a local `claude` CLI login the Agent SDK can fall back to? (presence check only — the secret is never read)
+ * Linux and Windows keep it in <config dir>/.credentials.json; macOS keeps it in the login Keychain, so there we ask
+ * `security` whether the item exists (without -w, which would print the secret). The Keychain answer is cached briefly.
+ */
+const KEYCHAIN_SERVICE = 'Claude Code-credentials';
+let keychainCache: { at: number; found: boolean } | undefined;
 export function hasClaudeLogin(): boolean {
   const dir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
-  return existsSync(join(dir, '.credentials.json'));
+  if (existsSync(join(dir, '.credentials.json'))) return true;
+  if (process.platform !== 'darwin') return false;
+  if (keychainCache && Date.now() - keychainCache.at < 30_000) return keychainCache.found;
+  let found = false;
+  try {
+    execFileSync('security', ['find-generic-password', '-s', KEYCHAIN_SERVICE], { stdio: 'ignore', timeout: 3000 });
+    found = true;
+  } catch { /* not found, no Keychain access, or no `security` binary */ }
+  keychainCache = { at: Date.now(), found };
+  return found;
 }
 
 /**

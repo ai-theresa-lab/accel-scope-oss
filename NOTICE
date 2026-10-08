@@ -1,4 +1,4 @@
-accel-scope
+Waggle
 Copyright 2026 AI Theresa
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
@@ -6,7 +6,7 @@ This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 Third-party components
 ----------------------
 
-accel-scope does not vendor any third-party code. It installs or invokes the following components, each under its own
+Waggle does not vendor any third-party code. It installs or invokes the following components, each under its own
 license:
 
 - @anthropic-ai/claude-agent-sdk (npm dependency) — governed by Anthropic's terms

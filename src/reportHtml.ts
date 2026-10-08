@@ -1,5 +1,5 @@
 // Renders a MinerResult into a self-contained, interactive HTML product report
-// in the accel-scope design language (espresso / honey / cream, Geist + Geist Mono).
+// in the Waggle design language (espresso / honey / cream, Geist + Geist Mono).
 //
 // This is the full visual deliverable: everything report.ts emits as markdown
 // (vitals, scorecard, findings, hotspots, change-coupling, contributors,
@@ -605,7 +605,7 @@ const BEE_DATA_URI = (() => {
   return `data:image/png;base64,${png.toString('base64')}`;
 })();
 
-const BEE_IMG = `<img src="${BEE_DATA_URI}" alt="accel-scope" style="width:100%;height:100%;display:block;object-fit:cover;">`;
+const BEE_IMG = `<img src="${BEE_DATA_URI}" alt="Waggle" style="width:100%;height:100%;display:block;object-fit:cover;">`;
 
 // ---- static CSS (design system as classes) --------------------------------
 
@@ -1162,7 +1162,7 @@ window.__theresaExportRemediation = function(){
   var D = window.__ACCEL_DATA__ || {};
   var target = D.target ? String(D.target) : 'diagnosis';
   var base = target.split(/[\\/]/).pop() || 'diagnosis';
-  var md = remediationMarkdown({ title: target, findings: D.findings || [], after: ' · accel-scope diagnostic' });
+  var md = remediationMarkdown({ title: target, findings: D.findings || [], after: ' · Waggle diagnostic' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
   a.download = base + '-REMEDIATION.md';
@@ -1265,7 +1265,7 @@ export function renderFindingsHtml(result: MinerResult, stamp: string, embedded 
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>accel-scope · ${escapeHtml(targetName)} · diagnostic</title>
+<title>Waggle · ${escapeHtml(targetName)} · diagnostic</title>
 <style>${CSS}${REPORT_STATUS_CSS}</style>
 </head>
 <body>
@@ -1280,7 +1280,7 @@ export function renderFindingsHtml(result: MinerResult, stamp: string, embedded 
     <div class="topbar-in">
       <span class="bee">${BEE_IMG}</span>
       <div style="display:flex;align-items:baseline;gap:9px">
-        <span style="font-weight:600;font-size:15.5px;letter-spacing:-.01em">accel-scope</span>
+        <span style="font-weight:600;font-size:15.5px;letter-spacing:-.01em">Waggle</span>
         <span class="eyebrow">diagnostic report</span>
       </div>
       <div class="tb-sep" style="display:flex;align-items:center;gap:9px">
@@ -1491,7 +1491,7 @@ function renderExecutionHtml(vm: ViewModel, result: MinerResult, brief?: string)
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>accel-scope · ${escapeHtml(targetName)} · execution report</title>
+<title>Waggle · ${escapeHtml(targetName)} · execution report</title>
 <style>${CSS}${REPORT_STATUS_CSS}${EXEC_CSS}</style>
 </head>
 <body>
@@ -1499,7 +1499,7 @@ function renderExecutionHtml(vm: ViewModel, result: MinerResult, brief?: string)
     <div class="topbar-in">
       <span class="bee">${BEE_IMG}</span>
       <div style="display:flex;align-items:baseline;gap:9px">
-        <span style="font-weight:600;font-size:15.5px;letter-spacing:-.01em">accel-scope</span>
+        <span style="font-weight:600;font-size:15.5px;letter-spacing:-.01em">Waggle</span>
         <span class="eyebrow">execution report</span>
       </div>
       <div class="tb-sep" style="display:flex;align-items:center;gap:9px">

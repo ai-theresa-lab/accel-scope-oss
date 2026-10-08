@@ -1,15 +1,15 @@
-# accel-scope — single-user, self-hosted image.
+# Waggle — single-user, self-hosted image.
 #
-#   docker build -t accel-scope .
-#   docker run --rm -p 127.0.0.1:4317:4317 -v accel-scope-data:/data \
-#     -e ANTHROPIC_API_KEY=sk-ant-... accel-scope
+#   docker build -t waggle .
+#   docker run --rm -p 127.0.0.1:4317:4317 -v waggle-data:/data \
+#     -e ANTHROPIC_API_KEY=sk-ant-... waggle
 #
 # Node 22 runs the TypeScript sources directly (--experimental-strip-types, no build step). git is needed for the
 # read-only repo clones a scan performs.
 #
 # Optional code intelligence (THERESA_CODEINTEL=1) uses repowise, an external AGPL-3.0 Python CLI that is invoked
 # strictly as a subprocess and never vendored. It is NOT installed by default; pass a pip requirement to include it:
-#   docker build --build-arg REPOWISE_SPEC='repowise @ git+https://github.com/repowise-dev/repowise@v0.28.0' -t accel-scope .
+#   docker build --build-arg REPOWISE_SPEC='repowise @ git+https://github.com/repowise-dev/repowise@v0.28.0' -t waggle .
 FROM node:22.17-slim AS repowise-builder
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates git python3 python3-venv \

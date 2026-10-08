@@ -22,9 +22,9 @@ test('COMPOUND refs are measured — the case an anchored ^plane: test gets wron
 
 test('code reading is NOT measured, whatever prefix it wears', () => {
   for (const ref of [
-    'static: accel-scope/accel-scope {src/eval/score.ts, eval/score.ts}',
-    'code:accel-scope/.github/workflows/*.yml + cloudbuild.yaml + package.json:21-22',
-    'repo:accel-scope/Dockerfile:55,60,70 + package-lock.json(grep \'@openai/codex\'=0)',
+    'static: Waggle/Waggle {src/eval/score.ts, eval/score.ts}',
+    'code:Waggle/.github/workflows/*.yml + cloudbuild.yaml + package.json:21-22',
+    'repo:Waggle/Dockerfile:55,60,70 + package-lock.json(grep \'@openai/codex\'=0)',
     'code set-diff: acme-rec-model/training/rec_model_v2/pipeline_mmoe.config',
     'code/artifact diff: recsys-training/checkpoints/rec_model_v2/export-final/pipeline.config',
   ]) assert.equal(evidenceKindFor(ref, MOUNTED), 'computation', ref.slice(0, 40));
@@ -53,7 +53,7 @@ test('prose mentioning a plane does not earn the stamp', () => {
 test('planeOf names the plane for display, and nothing for a read', () => {
   assert.equal(planeOf('repo+redis+acmedash:analytics_dwd.x', MOUNTED), 'redis', 'first live plane named in the ref');
   assert.equal(planeOf('amplitude:union(search_* uniques)', MOUNTED), 'amplitude');
-  assert.equal(planeOf('static: accel-scope/src', MOUNTED), undefined, 'a read gets no label rather than a misleading one');
+  assert.equal(planeOf('static: Waggle/src', MOUNTED), undefined, 'a read gets no label rather than a misleading one');
 });
 
 test('measuredShare counts findings, not evidence rows, and ignores the evidence-less', () => {

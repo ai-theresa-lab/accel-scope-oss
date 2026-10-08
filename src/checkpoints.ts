@@ -89,7 +89,7 @@ export interface CkptMeta {
   at: string;                 // ISO capture time
   bytes: number;              // payload file size (display)
   stageVersion: number;       // CKPT_STAGE_VERSION at capture — fail-closed on mismatch
-  producerGitSha?: string;    // accel-scope code version at capture — mismatch ⇒ 'code_changed' (allowed; the iteration case)
+  producerGitSha?: string;    // Waggle code version at capture — mismatch ⇒ 'code_changed' (allowed; the iteration case)
   label: string;              // display ("Bundle frontier · 2/3")
   detail?: string;            // display sub ("recsys-mle ✓ · baseline ✓ · data-eng lost")
   bundlesDone?: string[];     // frontier/barrier: the completed-bundle SET — the identity of the cut
@@ -100,7 +100,7 @@ interface CkptFile { v: 1; runId: string; meta: CkptMeta; inputsFp: string; payl
 
 function ckptPath(runId: string, id: CkptId): string { return reportArtifactPath(runId, `ckpt-${id}.json`); }
 
-// The running accel-scope code version (memoized). Undefined when not a git checkout
+// The running Waggle code version (memoized). Undefined when not a git checkout
 // (e.g. a container image built without .git) — compat then rests on stage versions alone.
 let gitShaCache: string | undefined | null = null;
 export function producerGitSha(): string | undefined {

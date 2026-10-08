@@ -1,6 +1,6 @@
 // Optional RANKING / retrieval-ranking domain PROFILE.
 //
-// accel-scope's invariants (i1–i11) stay GENERAL — the anti-reward-hacking rule forbids
+// Waggle's invariants (i1–i11) stay GENERAL — the anti-reward-hacking rule forbids
 // encoding any company's specific pain list or answers in the detector. This profile is a
 // value-free recsys investigative LENS that SHARPENS those general invariants when the
 // project is a recommender / search / retrieval-ranking system. It contains METHODS only

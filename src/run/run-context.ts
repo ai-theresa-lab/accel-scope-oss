@@ -15,7 +15,7 @@
 //
 // RUNTIME CONSTRAINT — this file runs under `node --experimental-strip-types`:
 //   • Erasable TypeScript ONLY: no enums, no parameter properties, no namespaces.
-//   • EVERY accel-scope type is a TYPE-ONLY import (`import type { … }`). Type-only imports are
+//   • EVERY Waggle type is a TYPE-ONLY import (`import type { … }`). Type-only imports are
 //     fully erased at runtime, so referencing `../server.ts` here does NOT load/boot the server
 //     (no HTTP listener, no singletons constructed). A value import from server.ts is forbidden.
 //   • Verify by RUNNING it (NOT `--check`, which doesn't strip types on node 22.x):

@@ -1,4 +1,4 @@
-// accel-scope console SERVER — the single-user, self-hosted control plane that turns the analysis pipeline into a
+// Waggle console SERVER — the single-user, self-hosted control plane that turns the analysis pipeline into a
 // connect → run → report app on localhost.
 //
 //   USER      one local user, no login (bind to localhost; see README → Security before exposing it)
@@ -15,6 +15,7 @@ import { mkdtempSync, rmSync, readFileSync, writeFileSync, mkdirSync, existsSync
 import { tmpdir } from 'node:os';
 import { join, basename, dirname, resolve as resolvePath } from 'node:path';
 import { renderApp } from './serverUi.ts';
+import { requestGuard, isLocalSecretPath } from './requestGuard.ts';
 import { renderFindingsHtml } from './reportHtml.ts';
 import { research } from './research/orchestrate.ts';
 import type { DerivedDimension, CoverageNote } from './research/deriveDimensions.ts';
@@ -623,6 +624,7 @@ function reportRunTelemetry(run: Run, outcome: 'complete' | 'error' | 'stopped',
   try {
     const kind = run.kind ?? 'org';
     if (kind !== 'org' && kind !== 'ask') return;
+    if (!telemetryStatus().noticeShown) return;   // nothing is sent before the first-run notice has been shown
     const event = kind === 'ask' ? 'quick-ask' : (run.incremental && run.incremental.mode !== 'full' ? 'incremental' : 'full-scan');
     const started = run.createdAt ? Date.parse(run.createdAt) : NaN;
     const counts: Record<string, number> = {};
@@ -998,6 +1000,7 @@ function copyRepoSnapshot(workspace: string, repo: { path: string; name: string 
   try {
     cpSync(repo.path, dest, { recursive: true, dereference: false, filter: (src) => {
       if (src !== repo.path && REPO_COPY_SKIP.test(src.slice(repo.path.length))) return false;  // SKIP relative to repo root
+      if (src !== repo.path && isLocalSecretPath(src)) return false;
       try { if (lstatSync(src).isSymbolicLink()) return false; } catch { /* keep */ }
       return true;
     } });
@@ -1380,6 +1383,9 @@ const server = createServer(async (req, res) => {
     const url = new URL(req.url || '/', BASE_URL);
     const path = url.pathname;
     const method = req.method || 'GET';
+
+    const refused = requestGuard(req, method);
+    if (refused) return sendJson(res, 403, { error: refused });
 
     if (method === 'GET' && !path.startsWith('/api/')) {
       res.setHeader('Cache-Control', 'no-store');
@@ -2497,7 +2503,7 @@ process.on('uncaughtException', (err) => {
 });
 server.listen(PORT, HOST, () => {
   const keys = apiKeyStatus();
-  console.log(`▶ accel-scope ${APP_VERSION} → ${BASE_URL}`);
+  console.log(`▶ Waggle ${APP_VERSION} → ${BASE_URL}`);
   console.log(`  data: ${dataDir()} · runs restored: ${[...store.allRuns()].length} · per-run cap: $${runBudget()}`);
   console.log(`  keys: Anthropic ${keys.anthropic.set ? 'set (' + keys.anthropic.source + ')' : keys.claudeLogin ? 'not set — using the local claude login' : 'NOT SET — add it in Settings → API keys'} · OpenAI ${keys.openai.set ? 'set (' + keys.openai.source + ')' : 'not set (optional)'}`);
   const tel = telemetryStatus();

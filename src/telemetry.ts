@@ -409,7 +409,7 @@ export function track(event: TelemetryEventName, fields: TelemetryFields = {}, o
     return Promise.resolve()
       .then(() => doFetch(url, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'user-agent': `accel-scope/${payload.version}` },
+        headers: { 'content-type': 'application/json', 'user-agent': `waggle/${payload.version}` },
         body,
         signal: AbortSignal.timeout(TELEMETRY_TIMEOUT_MS),
         credentials: 'omit',

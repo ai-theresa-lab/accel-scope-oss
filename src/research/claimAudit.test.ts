@@ -176,11 +176,11 @@ test('a file the workspace clone has is resolved there (repo-relative, workspace
   const { join } = await import('node:path');
   const root = mkdtempSync(join(tmpdir(), 'ws-ev-'));
   try {
-    mkdirSync(join(root, 'accel-scope', '.github', 'workflows'), { recursive: true });
-    writeFileSync(join(root, 'accel-scope', '.github', 'workflows', 'claude-review.yml'), 'on: issue_comment');
+    mkdirSync(join(root, 'Waggle', '.github', 'workflows'), { recursive: true });
+    writeFileSync(join(root, 'Waggle', '.github', 'workflows', 'claude-review.yml'), 'on: issue_comment');
     assert.deepEqual(resolveEvidenceInWorkspace('code:.github/workflows/claude-review.yml:20', root), ['.github/workflows/claude-review.yml']);
-    assert.deepEqual(resolveEvidenceInWorkspace('code:accel-scope/.github/workflows/claude-review.yml', root), ['accel-scope/.github/workflows/claude-review.yml']);
-    assert.deepEqual(resolveEvidenceInWorkspace('code:example-org/accel-scope/.github/workflows/claude-review.yml', root), ['example-org/accel-scope/.github/workflows/claude-review.yml']);
+    assert.deepEqual(resolveEvidenceInWorkspace('code:Waggle/.github/workflows/claude-review.yml', root), ['Waggle/.github/workflows/claude-review.yml']);
+    assert.deepEqual(resolveEvidenceInWorkspace('code:example-org/Waggle/.github/workflows/claude-review.yml', root), ['example-org/Waggle/.github/workflows/claude-review.yml']);
     assert.deepEqual(resolveEvidenceInWorkspace('code:.github/workflows/missing.yml', root), []);
     assert.deepEqual(resolveEvidenceInWorkspace('code:.github/workflows/claude-review.yml', undefined), []);
     // a LIVE-plane ref is re-derived by re-running the query, not by reading a file → never settled by the workspace
@@ -212,7 +212,7 @@ test('a re-run that READ the workspace file and found the content contradicts th
 test('reverifyCouldNotReach: access wording / empty note → could not reach', () => {
   const ws = ['.github/workflows/claude-review.yml'];
   assert.equal(reverifyCouldNotReach(undefined, ws), true);
-  assert.equal(reverifyCouldNotReach('accel-scope is unreachable/private; HTTP 404', ws), true);
+  assert.equal(reverifyCouldNotReach('Waggle is unreachable/private; HTTP 404', ws), true);
   assert.equal(reverifyCouldNotReach('The claimed .github/workflows/claude-review.yml does not exist in the live read-only plane', ws), true);
   assert.equal(reverifyCouldNotReach('no such file claude-review.yml on the default branch', ws), true);
 });

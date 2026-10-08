@@ -8,7 +8,7 @@ within 3 working days and to ship a fix or mitigation for confirmed issues as qu
 
 ## Scope and threat model
 
-accel-scope is a **single-user, self-hosted** app:
+Waggle is a **single-user, self-hosted** app:
 
 - The console has no login. It binds to `127.0.0.1` by default; exposing it to a network without your own
   authentication in front of it gives anyone who can reach the port your API keys' spending power and your reports.

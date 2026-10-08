@@ -1,6 +1,6 @@
-# accel-scope telemetry collector
+# Waggle telemetry collector
 
-A tiny, separately deployed HTTP service that receives the anonymous usage events sent by accel-scope
+A tiny, separately deployed HTTP service that receives the anonymous usage events sent by Waggle
 (`src/telemetry.ts`) and stores them in BigQuery. It is **not** part of the main app build.
 
 - `POST /v1/events`: one JSON event per request, answered `202` when accepted.
@@ -8,7 +8,7 @@ A tiny, separately deployed HTTP service that receives the anonymous usage event
 
 ## What the client sends (and what it never sends)
 
-Telemetry is on by default in accel-scope. On first run the app shows a notice, and users turn it off with
+Telemetry is on by default in Waggle. On first run the app shows a notice, and users turn it off with
 `THERESA_TELEMETRY=0` (also `off` / `false` / `no`, or `DO_NOT_TRACK=1`) or in Settings. Running with
 `--print-telemetry` (or `THERESA_TELEMETRY_PRINT=1`) prints every payload to stderr exactly as sent.
 

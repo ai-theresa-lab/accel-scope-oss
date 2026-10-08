@@ -1,11 +1,11 @@
-// The SHARED free-vibe report contract — one source of truth for every accel-scope free-vibe HTML report
+// The SHARED free-vibe report contract — one source of truth for every Waggle free-vibe HTML report
 // (the rec-audit/leadership report via leadershipVibe).
 // It holds the parts that must be IDENTICAL across reports — the house style, the recsys terminology, and the
 // HOW-to-render mechanics (self-contained English HTML, the bullet format, chart/table correctness, output).
 // Each report adds only its WHAT-to-say content rules on top. Consolidating here means a fix lands in all at once.
 
-// accel-scope house style — the same look as the structured report (recallReportHtml.ts) and the console frontend.
-export const THERESA_STYLE = `HOUSE STYLE — match the accel-scope report design (the same look as our standard reports + console). Obey it:
+// Waggle house style — the same look as the structured report (recallReportHtml.ts) and the console frontend.
+export const THERESA_STYLE = `HOUSE STYLE — match the Waggle report design (the same look as our standard reports + console). Obey it:
 PALETTE (use these EXACT values, via CSS variables): ink/text --espresso #3E261C · secondary --ink2 #5a4a3d ·
   accent (bars, left-borders, highlights) --honey #FEC240 · labels/section-numbers/links --honey-link #9A6A0E ·
   page bg --cream #FAF8F4 · card bg --card #FEFDFC · borders/dividers --line #E7E0D4 · meta/caption --muted #8A7E6E ·
@@ -44,7 +44,7 @@ export const FREE_VIBE_CONTRACT = `${THERESA_STYLE}
 ${RECSYS_GLOSSARY}
 
 WRITE THE HTML — your judgement on layout WITHIN the house style above, obeying these HARD rules (the same contract
-for every accel-scope free-vibe report):
+for every Waggle free-vibe report):
 1. ONE complete, SELF-CONTAINED HTML document: start with <!DOCTYPE html>, end with </html>. Inline <style> only;
    system font stack; NO external resource (no CDN, web font, <img> URL, fetch/XHR). No <script> is needed.
 2. ENGLISH — write the whole report in English. EVERY label — eyebrows, card titles, section headings, chart axes,

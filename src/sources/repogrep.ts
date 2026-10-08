@@ -21,7 +21,7 @@ function ghHeaders(token: string, accept = 'application/vnd.github+json'): Recor
   return {
     Authorization: `Bearer ${token}`,
     Accept: accept,
-    'User-Agent': 'accel-scope',
+    'User-Agent': 'waggle',
     'X-GitHub-Api-Version': '2022-11-28',
   };
 }

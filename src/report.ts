@@ -56,7 +56,7 @@ export function renderReport(result: MinerResult, stamp: string): string {
   for (const f of findings) sevCounts[f.severity] = (sevCounts[f.severity] ?? 0) + 1;
 
   const out: string[] = [];
-  out.push(`# accel-scope · diagnostic report`);
+  out.push(`# Waggle · diagnostic report`);
   out.push('');
   out.push(`**Target:** \`${result.target}\`  `);
   out.push(`**Generated:** ${stamp}  `);

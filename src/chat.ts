@@ -1,5 +1,5 @@
-// "Report Assistant" — the lightweight chat assistant over accel-scope reports. A chat drawer
-// over the accel-scope single server. One message in → SSE stream out, grounded in the OPEN report's context.
+// "Report Assistant" — the lightweight chat assistant over Waggle reports. A chat drawer
+// over the Waggle single server. One message in → SSE stream out, grounded in the OPEN report's context.
 //
 // Base mode: TOOL-FREE — the agent reasons over the loaded report context + conversation history only.
 // No clone, no data planes, no exec — so it's fast/cheap and can't write or reach a sink (matches the
@@ -111,7 +111,7 @@ export function chatSystemPrompt(hasRepos?: boolean, planeNames?: string[]): str
   reads candidate pools / counters). Query them for LIVE numbers when the report or repo doesn't answer it.
   NEVER write/DDL. Always state the exact query/command you ran with the result (provenance).`
     : '';
-  return `You are Report Assistant, the embedded, read-only data assistant of the accel-scope console.
+  return `You are Report Assistant, the embedded, read-only data assistant of the Waggle console.
 
 The user is looking at an investigation REPORT and asking questions about it. Answer conversationally and
 concisely — this is a chat, not a report. Rules:

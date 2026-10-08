@@ -1,4 +1,4 @@
-// accel-scope org CLI: aggregate diagnosis across all git repos under a root.
+// Waggle org CLI: aggregate diagnosis across all git repos under a root.
 //
 // Usage:  npm run analyze:org -- <root-dir> [--out <dir>]
 //                                [--fork-cutoff <name=ISO,name=ISO,...>]
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
   const stamp = new Date().toISOString();
   const forkCutoffs = parseForkCutoffs(forkCutoff);
 
-  console.log(`▶ accel-scope: org-wide analysis of ${root} …`);
+  console.log(`▶ Waggle: org-wide analysis of ${root} …`);
   if (Object.keys(forkCutoffs).length) console.log(`  fork cutoffs: ${Object.entries(forkCutoffs).map(([k, v]) => `${k}@${v}`).join(', ')}`);
   const result = await analyzeOrg(root, undefined, forkCutoffs);
 

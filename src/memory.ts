@@ -12,7 +12,7 @@
 // never as current truth (keeps the evidence contract intact). Write path: the run's confirmed
 // findings are merged into the Tier-1 ledger (status + first/last-seen + run count) after each run.
 //
-// Dep-free on purpose (accel-scope ships zero runtime deps beyond the Agent SDK): JSON for Tier-1,
+// Dep-free on purpose (Waggle ships zero runtime deps beyond the Agent SDK): JSON for Tier-1,
 // a tiny frontmatter parser for the Tier-2 markdown bank — no YAML dependency.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
