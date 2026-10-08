@@ -3,8 +3,8 @@
 // lands under that base, kept pure-ish (fs only, no server state) so it is unit-tested.
 //
 // ONE LEVEL TOO DEEP. The browser posts each file's `webkitRelativePath`, which is prefixed with the PICKED
-// folder's own name (`accel-scope/src/server.ts`), and the old writer put that under `<base>/` verbatim — so the
-// snapshot became `<base>/accel-scope/src/…`, the workspace read `accel-scope/accel-scope/…`, and every root-relative
+// folder's own name (`Waggle/src/server.ts`), and the old writer put that under `<base>/` verbatim — so the
+// snapshot became `<base>/Waggle/src/…`, the workspace read `Waggle/Waggle/…`, and every root-relative
 // check (a lockfile at the root, `.github/workflows`, a README) missed. `uploadRelPaths` strips that shared leading
 // segment when it equals the folder name the client sent, so the files land at the snapshot ROOT.
 import { mkdirSync, writeFileSync } from 'node:fs';

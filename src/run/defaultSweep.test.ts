@@ -76,7 +76,7 @@ test('the sweep asks for decisions, bounds the claim, and keeps the tool out of 
 // Borrowed from root-cause debugging practice, which a security taxonomy does not carry. Both earn
 // their place from this session: the dev-tools report listed FOUR separate control failures that were
 // really four holes in ONE path a change takes to production — a fact only visible once they were drawn
-// on one line. And accel-scope already mines git history deterministically, but nothing asked the
+// on one line. And Waggle already mines git history deterministically, but nothing asked the
 // investigation to use it.
 test('the sweep prefers the cause to the symptom', () => {
   assert.match(DEFAULT_SWEEP_BRIEF, /PREFER THE CAUSE TO THE SYMPTOM/);

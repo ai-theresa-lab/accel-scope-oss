@@ -202,7 +202,7 @@ test('track posts the whitelisted payload with minimal headers', async () => {
   assert.equal(calls[0]!.init.method, 'POST');
   assert.deepEqual(Object.keys(calls[0]!.init.headers).sort(), ['content-type', 'user-agent']);
   assert.equal(calls[0]!.init.headers['content-type'], 'application/json');
-  assert.match(calls[0]!.init.headers['user-agent']!, /^accel-scope\/\S+$/);
+  assert.match(calls[0]!.init.headers['user-agent']!, /^waggle\/\S+$/);
   assert.equal(calls[0]!.init.credentials, 'omit');
   const body = JSON.parse(calls[0]!.init.body);
   assertSchema(body);

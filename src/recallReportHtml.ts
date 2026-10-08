@@ -62,7 +62,7 @@ export function recallFooter(input: Pick<RecallReportInput, 'company' | 'measure
   const what = area ? 'area report' : 'leadership review';
   const basis = input.measuredLive ? 'numbers measured from production logs' : 'read-only diagnosis of the connected sources';
   const tail = area ? '' : ' The detailed engineering report is separate.';
-  return `accel-scope · ${input.company} · ${what} — ${basis}; experiment-dependent judgements flagged, not asserted.${tail}`;
+  return `Waggle · ${input.company} · ${what} — ${basis}; experiment-dependent judgements flagged, not asserted.${tail}`;
 }
 
 // Does a rendered report actually CARRY the codeintel cross-repo viz? The console's code-intelligence card
@@ -169,7 +169,7 @@ export function renderRecallReport(input: RecallReportInput): string {
   // Contrast floor: --muted / --honey-link colour the 11px mono labels (eyebrow, meta, .k kickers, footer), so both
   // clear WCAG AA 4.5:1 on the cream grounds (were #8A7E6E ≈ 3.7:1 and #9A6A0E ≈ 4.4:1). reportChrome.test.ts.
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>accel-scope · ${esc(input.company)} · ${input.tier === 'area' ? 'area review' : 'diagnostic review'}</title><style>
+<title>Waggle · ${esc(input.company)} · ${input.tier === 'area' ? 'area review' : 'diagnostic review'}</title><style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--espresso:#3E261C;--honey:#FEC240;--honey-link:#875D0B;--cream:#FAF8F4;--card:#FEFDFC;--line:#E7E0D4;--muted:#6F6455;--ink2:#5a4a3d;--red:#C0392B;--green:#2F7D54}
 body{background:var(--cream);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--espresso);line-height:1.7;-webkit-font-smoothing:antialiased}
@@ -215,7 +215,7 @@ th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line)}th{ba
 .caveat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:13.5px;color:var(--ink2);max-width:78ch;margin-top:14px}
 .foot{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-family:ui-monospace,monospace;font-size:11px;color:var(--muted)}
 </style></head><body>
-<div class="bar"><div class="bar-in"><span class="blogo">accel-scope</span></div></div>
+<div class="bar"><div class="bar-in"><span class="blogo">Waggle</span></div></div>
 <div class="wrap">
  <div class="top"><div class="eyebrow">${esc(input.subtitle || defaultSubtitle(input))}</div>
   <h1>${esc(input.title)}</h1><p class="q">${esc(input.question)}</p>

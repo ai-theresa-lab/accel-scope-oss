@@ -1,10 +1,12 @@
-# accel-scope
+# Waggle
+
+*Formerly accel-scope.* Like a scout bee's waggle dance, it goes out into your code and comes back with what matters.
 
 **Point an AI auditor at your repositories (and, optionally, your warehouse) and get an evidence-backed report plus a fix plan your coding agent can run.**
 
-![accel-scope console](docs/screenshot.png)
+![Waggle console](docs/screenshot.png)
 
-accel-scope runs on your machine. It clones the code you select read-only, lets a team of Claude agents investigate it, verifies every claim against the code, and writes two reports: a short **Leadership** brief (what matters and what to decide) and an **Execution** report (every finding with evidence, the fix, how to verify it, and a `REMEDIATION.md` you can hand to a coding agent).
+Waggle runs on your machine. It clones the code you select read-only, lets a team of Claude agents investigate it, verifies every claim against the code, and writes two reports: a short **Leadership** brief (what matters and what to decide) and an **Execution** report (every finding with evidence, the fix, how to verify it, and a `REMEDIATION.md` you can hand to a coding agent).
 
 ## What it does
 
@@ -19,7 +21,7 @@ accel-scope runs on your machine. It clones the code you select read-only, lets 
 Requirements: Node.js 22.7+ and git.
 
 ```bash
-git clone https://github.com/ai-theresa-lab/accel-scope-oss.git && cd accel-scope-oss
+git clone https://github.com/ai-theresa-lab/waggle.git && cd waggle
 npm ci
 ANTHROPIC_API_KEY=sk-ant-... npm start
 ```
@@ -29,8 +31,8 @@ Open <http://localhost:4317>. (You can also leave the key out and paste it in **
 With Docker:
 
 ```bash
-docker build -t accel-scope .
-docker run --rm -p 127.0.0.1:4317:4317 -v accel-scope-data:/data -e ANTHROPIC_API_KEY=sk-ant-... accel-scope
+docker build -t waggle .
+docker run --rm -p 127.0.0.1:4317:4317 -v waggle-data:/data -e ANTHROPIC_API_KEY=sk-ant-... waggle
 ```
 
 ## API keys and cost
@@ -39,7 +41,7 @@ All model usage bills **your own** API keys. Keys are only ever sent to the prov
 
 | Key | | Used for |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | required | Every agent in the pipeline (Claude Agent SDK). A Claude plan token from `claude setup-token` (`sk-ant-oat…`) also works, and without any key an existing local `claude` login is used. |
+| `ANTHROPIC_API_KEY` | required | Every agent in the pipeline (Claude Agent SDK). A Claude plan token from `claude setup-token` (`sk-ant-oat…`) also works, and without any key an existing local `claude` login is used (on macOS it is found in the Keychain). |
 | `OPENAI_API_KEY` | optional | Report writing, quality-check judges and cross-report reconciliation try OpenAI first (and the `codex` CLI when installed) and fall back to Claude without it. |
 
 Set them in the environment, in a `.env` file in the working directory, or in **Settings → API keys** (memory only, unless you tick *Save keys on this machine*, which writes `<data dir>/keys.json` with mode 0600).
@@ -62,7 +64,7 @@ All connectors are read-only.
 |---|---|
 | Public GitHub repos | Paste URLs. Cloned without credentials. |
 | Private GitHub repos | A read-only personal access token. |
-| Local folders | A path on this machine, or a folder uploaded from the browser. |
+| Local folders | A path on this machine, or a folder uploaded from the browser. Local secrets (`.env` files other than templates such as `.env.example`, private keys, Waggle's own data folder) are left out of the scan. |
 | BigQuery | A service-account key (JSON) with a read-only role. Queries are `SELECT`-only with a per-query scan cap. |
 | SQL warehouse / Redis / any MCP server | The URL of a read-only MCP server (and an optional bearer token). The agent may call every tool the server exposes unless you list the allowed tools, so connect read-only servers or read-only database users. |
 
@@ -72,7 +74,7 @@ Connection credentials (tokens, service-account keys, and credentials embedded i
 
 Your code, data, questions and reports stay on your machine; they are sent only to the model providers whose keys you configured, as part of the prompts the agents need.
 
-accel-scope sends **anonymous usage telemetry** so we can see how it is used. It is **on by default**, the console tells you so on first run, and you can turn it off at any time:
+Waggle sends **anonymous usage telemetry** so we can see how it is used. It is **on by default**, the console tells you so on first run, and you can turn it off at any time:
 
 - `THERESA_TELEMETRY=0` (or `DO_NOT_TRACK=1`) in the environment, or the switch in **Settings → Telemetry**;
 - `npm start -- --print-telemetry` prints every payload exactly as it is sent.
@@ -97,7 +99,7 @@ Never sent: repository names or URLs, code, file paths, questions or briefs, fin
 
 ## Security
 
-The console has **no login**: it is a single-user app. It listens on `127.0.0.1` by default, and the Docker example publishes the port on `127.0.0.1` only. Anyone who can reach the port can run scans on your keys and read your reports, so do not expose it to a network without putting your own authentication in front of it.
+The console has **no login**: it is a single-user app. It listens on `127.0.0.1` by default, and the Docker example publishes the port on `127.0.0.1` only. Anyone who can reach the port can run scans on your keys and read your reports, so do not expose it to a network without putting your own authentication in front of it. The server also refuses requests that a web page you visit could make on your behalf: a cross-site request (CSRF), or a request under another host name (DNS rebinding).
 
 Reports are generated by language models from code you scan, so they are served under a strict Content-Security-Policy in a sandboxed frame. See [SECURITY.md](SECURITY.md) to report a vulnerability.
 
@@ -106,6 +108,7 @@ Reports are generated by language models from code you scan, so they are served 
 | Variable | Default | |
 |---|---|---|
 | `PORT` / `HOST` | `4317` / `127.0.0.1` | Where the console listens. |
+| `THERESA_ALLOWED_HOSTS` | none | Extra host names the console answers to (comma-separated), e.g. behind your own reverse proxy. Only `localhost`, `127.0.0.1` and `[::1]` are served otherwise. |
 | `THERESA_DATA_DIR` | `./.data` | Run history, reports, memory, settings. |
 | `THERESA_RUN_BUDGET` | `20` | Per-run spend cap in USD (overrides the Settings value). |
 | `THERESA_TELEMETRY` | on | `0` turns telemetry off. |
@@ -127,4 +130,4 @@ Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-accel-scope is licensed under the [Apache License 2.0](LICENSE). It depends on the [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk), which is installed from npm and governed by Anthropic's own terms. See [NOTICE](NOTICE) for third-party components.
+Waggle is licensed under the [Apache License 2.0](LICENSE). It depends on the [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk), which is installed from npm and governed by Anthropic's own terms. See [NOTICE](NOTICE) for third-party components.

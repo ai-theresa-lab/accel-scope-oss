@@ -19,7 +19,7 @@ const GH = 'https://api.github.com';
 function ghHeaders(token?: string): Record<string, string> {
   const h: Record<string, string> = {
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'accel-scope',
+    'User-Agent': 'waggle',
     'X-GitHub-Api-Version': '2022-11-28',
   };
   if (token) h.Authorization = `Bearer ${token}`;

@@ -102,7 +102,7 @@ HOW TO WORK:
      removed, does NOT belong in bottomLine). Sink those details DOWN into \`mechanism\` and \`tightening\`. Few
      identifiers — plain language a non-technical reader gets in one pass; \`mechanism\` is the technical-detail layer.
    • \`scope\`: what you ACTUALLY inspected (\`covered\`) vs what you did NOT and only inferred (\`notCovered\`) —
-     be explicit (e.g. covered: "accel-scope (source read directly)"; notCovered: "the backend — inferred from
+     be explicit (e.g. covered: "Waggle (source read directly)"; notCovered: "the backend — inferred from
      the API contract"). This is not optional honesty theater; state the real boundary of the investigation.
    • \`flow\`: an OPTIONAL process diagram — emit it ONLY when the answer describes a PROCESS / DATA-FLOW worth a
      picture (a pipeline, a read/write path, a request lifecycle). If the answer is not a process, OMIT \`flow\`.

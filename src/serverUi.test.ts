@@ -125,12 +125,12 @@ test('The source dropdown closes on outside click and Esc', () => {
 
 test('The same repo ticked in two sources is flagged; uploaded folders show time + file count', () => {
   const sources = [
-    { id: 'gh', kind: 'github', name: 'GitHub', artifacts: [{ id: 'example-org/accel-scope', label: 'example-org/accel-scope' }, { id: 'o/other', label: 'o/other' }] },
-    { id: 'pu', kind: 'giturl', name: 'Public URL', artifacts: [{ id: 'https://github.com/Example-Org/accel-scope.git', label: 'example-org/accel-scope' }] },
+    { id: 'gh', kind: 'github', name: 'GitHub', artifacts: [{ id: 'example-org/Waggle', label: 'example-org/Waggle' }, { id: 'o/other', label: 'o/other' }] },
+    { id: 'pu', kind: 'giturl', name: 'Public URL', artifacts: [{ id: 'https://github.com/Example-Org/Waggle.git', label: 'example-org/Waggle' }] },
   ];
-  const sel = { 'gh::example-org/accel-scope': true, 'gh::o/other': true, 'pu::https://github.com/Example-Org/accel-scope.git': true };
-  assert.deepEqual(H.duplicateRepoTargets(sources, sel), [{ repo: 'example-org/accel-scope', sources: ['GitHub', 'Public URL'] }]);
-  assert.deepEqual(H.duplicateRepoTargets(sources, { ...sel, 'pu::https://github.com/Example-Org/accel-scope.git': false }), []);
+  const sel = { 'gh::example-org/Waggle': true, 'gh::o/other': true, 'pu::https://github.com/Example-Org/Waggle.git': true };
+  assert.deepEqual(H.duplicateRepoTargets(sources, sel), [{ repo: 'example-org/Waggle', sources: ['GitHub', 'Public URL'] }]);
+  assert.deepEqual(H.duplicateRepoTargets(sources, { ...sel, 'pu::https://github.com/Example-Org/Waggle.git': false }), []);
   const now = Date.parse('2026-09-25T12:00:00Z');
   const recent = H.localFolderSub({ uploadedAt: '2026-09-24T18:05:00Z', count: 1234 }, now);
   assert.match(recent, /^local folder · uploaded Sep 2[45], \d{1,2}:05:00\s[AP]M · 1234 files$/);
@@ -291,7 +291,7 @@ test('One verb for new runs, one filter vocabulary, one bundle display-name map'
 test('No codenames / internals in user-facing copy', () => {
   assert.equal(S.friendlySourceDetail('GitHub PAT · Secret Manager acme-gh-pat · resolved per run'), 'GitHub PAT · Secret Manager · resolved per run');
   assert.equal(S.friendlySourceDetail('BigQuery · SA key via Secret Manager (acme-bq-sa-key) · read-only'), 'BigQuery · SA key via Secret Manager · read-only');
-  assert.equal(S.friendlySourceDetail('/data/uploads/t_1/accel-scope · 1 repo(s) · read-only'), '1 repo · read-only');
+  assert.equal(S.friendlySourceDetail('/data/uploads/t_1/Waggle · 1 repo(s) · read-only'), '1 repo · read-only');
   assert.equal(S.friendlySourceDetail('2 public repo(s) · URL, no auth'), '2 public repos · URL, no auth', 'walkthrough: stored "(s)" details read as a real plural');
   assert.equal(S.friendlySourceDetail('1 public repo(s) · URL, no auth'), '1 public repo · URL, no auth');
   assert.equal(S.friendlySourceDetail('octocat · 12 repos · read-only'), 'octocat · 12 repos · read-only');
@@ -388,7 +388,7 @@ test('the Design Doc tab is gone: no nav item, panel, chooser option or API call
 test('Report library search + kind filter; the count is labeled', () => {
   const runs = [
     { id: 'rs_1', kind: 'ask', targetName: 'cold start', question: 'How is cold-start defined?' },
-    { id: 'rs_2', targetName: 'accel-scope', renamed: 'Self audit' },
+    { id: 'rs_2', targetName: 'Waggle', renamed: 'Self audit' },
     { id: 'rs_3', kind: 'design', targetName: 'memory system' },
   ];
   const ids = (xs: { id: string }[]) => xs.map((r) => r.id);
@@ -610,7 +610,7 @@ test('Quick Ask repo picker: nothing pre-ticked; every row is labelled by its ow
 });
 
 test('polish: the Checkpoints "older build" badge explains itself in plain words', () => {
-  assert.match(APP, /<span class="sbadge" title="made by an earlier version of accel-scope — resuming still works; results may differ slightly">older build · reusable<\/span>/);
+  assert.match(APP, /<span class="sbadge" title="made by an earlier version of Waggle — resuming still works; results may differ slightly">older build · reusable<\/span>/);
 });
 
 test('polish: Memory → Compare with fewer than two projects says so above the table (the table stays)', () => {
@@ -1084,12 +1084,12 @@ test('English only: no CJK character in the console source or the rendered page'
 });
 
 test('no legacy brand, hosted-console wording or raw org ids in the console', () => {
-  // The product word is accel-scope; the THERESA_* env prefix and theresa.* storage keys are code, not copy.
+  // The product word is Waggle; the THERESA_* env prefix and theresa.* storage keys are code, not copy.
   assert.doesNotMatch(APP, /\bTheresa\b/);
   assert.doesNotMatch(APP, /operator console|org_[0-9a-f]{8}/i);
 
-  assert.match(APP, /<title>accel-scope<\/title>/);
-  assert.match(APP, /<span class="nm">accel-scope<\/span>/);
+  assert.match(APP, /<title>Waggle<\/title>/);
+  assert.match(APP, /<span class="nm">Waggle<\/span>/);
 });
 
 test('removed server endpoints are never called', () => {

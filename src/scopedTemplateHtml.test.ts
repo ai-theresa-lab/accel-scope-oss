@@ -25,19 +25,19 @@ const MODEL_FLOW: FlowSpec = {
 // RAW fields carry authored <code>/<span class="lead">; one PLAIN field (client) carries <script> + & to prove
 // escaping. 4 tightening cards exercise all three effort chips.
 const MODEL: ScopedReportModel = {
-  brand: { name: 'accel-scope', sub: 'Engineering Audit' },
+  brand: { name: 'Waggle', sub: 'Engineering Audit' },
   client: 'Acme <script>alert(1)</script> & Co. (sample)', // PLAIN field w/ hostile chars — must be escaped
   scope: 'Quick Ask · single question',
   date: '2026-07-17',
   confidential: 'Confidential · internal',
-  question: "How does accel-scope's org memory work, and where can it tighten?",
+  question: "How does Waggle's org memory work, and where can it tighten?",
   breadcrumb: { dimension: 'Architecture', sub: 'Memory system' },
   scopeBlock: {
-    covered: ['accel-scope (source read directly)'],
+    covered: ['Waggle (source read directly)'],
     notCovered: ['the intake-service backend — inferred from the client contract only'],
   },
   bottomLine: [
-    'accel-scope owns no memory store — it is a thin HTTP client to the backend <code>org_memory</code> card store.',
+    'Waggle owns no memory store — it is a thin HTTP client to the backend <code>org_memory</code> card store.',
     '<span class="lead">Reads are on by default, writes are off.</span> A write needs two keys.',
   ],
   mechanism: [
@@ -70,8 +70,8 @@ test('is a complete self-contained HTML document (doctype + inline style, no ext
 });
 
 test('bee masthead + wordmark + Quick Ask kicker over the confidential line', () => {
-  assert.match(H, /<div class="wordmark"><b>accel-scope<\/b><small>Engineering Audit<\/small><\/div>/);
-  assert.match(H, /<span class="bee"><img src="data:image\/png;base64,[A-Za-z0-9+/=]{100,}" alt="accel-scope"/);
+  assert.match(H, /<div class="wordmark"><b>Waggle<\/b><small>Engineering Audit<\/small><\/div>/);
+  assert.match(H, /<span class="bee"><img src="data:image\/png;base64,[A-Za-z0-9+/=]{100,}" alt="Waggle"/);
   assert.doesNotMatch(H, /PLACEHOLDER LOGO/); // the old placeholder hexagon SVG is gone
   assert.match(H, /Quick Ask<br \/>Confidential · internal/); // kicker over the (overridden) confidential line
   const dflt = renderScopedReport({ ...MODEL, confidential: undefined });
@@ -85,7 +85,7 @@ test('shares the theme-aware design system (light/dark custom properties)', () =
 });
 
 test('the question is the report title (h1); breadcrumb was removed', () => {
-  assert.match(H, /<h1>How does accel-scope&#39;s org memory work, and where can it tighten\?<\/h1>/);
+  assert.match(H, /<h1>How does Waggle&#39;s org memory work, and where can it tighten\?<\/h1>/);
   assert.doesNotMatch(H, /class="crumb"/); // breadcrumb gone
   assert.doesNotMatch(H, /This question falls under/);
   assert.match(H, /<b>Project<\/b> Acme/); // doc-meta project label
@@ -118,7 +118,7 @@ test('3-tab layout: left nav (01/02/03), p1 initially active, panels + setTab sc
 // ── p1 · Answer & How it works ────────────────────────────────────────────────────────────────────────────
 test('p1 Answer: heading + honey lead callout + unified list; RAW <code>/<span class="lead"> survive', () => {
   assert.match(H, /<div class="p-h">Answer<\/div>\n        <div class="answer-lead">\n        <ul class="list">/);
-  assert.match(H, /<li>accel-scope owns no memory store — it is a thin HTTP client to the backend <code>org_memory<\/code>/);
+  assert.match(H, /<li>Waggle owns no memory store — it is a thin HTTP client to the backend <code>org_memory<\/code>/);
   assert.match(H, /<li><span class="lead">Reads are on by default, writes are off\.<\/span> A write needs two keys\.<\/li>/);
 });
 
@@ -163,7 +163,7 @@ test('p3: Scope dual-colour boxes + Evidence + Not-verified, all one unified lis
   const p3 = H.match(/<section class="panel" id="p3"[\s\S]*?<\/section>/)![0];
   // Scope = two same-style .p3-box in a .scope-grid; covered normal, not-covered dimmed
   assert.match(p3, /<div class="p-h">Scope<\/div>\n        <div class="scope-grid">/);
-  assert.match(p3, /<div class="p3-box-k">Covered<\/div>\n        <ul class="list">\n          <li>accel-scope \(source read directly\)<\/li>/);
+  assert.match(p3, /<div class="p3-box-k">Covered<\/div>\n        <ul class="list">\n          <li>Waggle \(source read directly\)<\/li>/);
   assert.match(p3, /<div class="p3-box-k">Not covered<\/div>\n        <ul class="list muted">\n          <li>the intake-service backend/);
   // Evidence + Not-verified reuse .p3-box + ul.list; RAW <code> survives
   assert.match(p3, /<div class="p-h">Evidence<\/div>\n        <div class="p3-box">\n        <ul class="list">\n          <li><code>orgMemory\.ts:40-79<\/code> — HTTP client/);
@@ -265,7 +265,7 @@ test('meta.title → h1 is the short title; the original question moves to the r
 
 test('no meta.title → h1 falls back to the question and there is NO reminder block (back-compat)', () => {
   // MODEL carries no title
-  assert.match(H, /<h1>How does accel-scope&#39;s org memory work, and where can it tighten\?<\/h1>/);
+  assert.match(H, /<h1>How does Waggle&#39;s org memory work, and where can it tighten\?<\/h1>/);
   assert.doesNotMatch(H, /class="yourq"/);
 });
 

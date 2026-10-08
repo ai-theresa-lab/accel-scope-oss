@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve accel-scope.
+Thanks for helping improve Waggle.
 
 ## Development
 

@@ -1,6 +1,6 @@
 # Architecture
 
-accel-scope is one Node process: an HTTP server (`src/server.ts`) that serves the console (`src/serverUi.ts`) and runs
+Waggle is one Node process: an HTTP server (`src/server.ts`) that serves the console (`src/serverUi.ts`) and runs
 the analysis pipeline in-process. State lives under the data dir (`THERESA_DATA_DIR`, default `./.data`):
 `state.json` (connections without credentials, run history), `reports/` (report HTML and per-run sidecars),
 `lineage/` and `org-findings/` (incremental re-scan), `org-projects/` and `org-facts/` (cross-project memory),

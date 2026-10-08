@@ -792,7 +792,7 @@ export function rebindReportRefUrls(html: string, runId: string): string {
 /**
  * The engineering report's URL for a run — ABSOLUTE when BASE_URL is configured.
  *
- * A root-relative `/api/runs/…` works only while the reader is on the accel-scope origin. It is not: a
+ * A root-relative `/api/runs/…` works only while the reader is on the Waggle origin. It is not: a
  * leadership or combined report can be EXPORTED to a dashboard, where the same markup resolves
  * against the dashboard's origin and that route does not exist — so every citation in an exported artifact
  * was broken. The same applies to a downloaded or emailed file. An absolute URL resolves from any origin and

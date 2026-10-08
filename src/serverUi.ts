@@ -1,5 +1,5 @@
-// The accel-scope console SHELL, served by src/server.ts — a single-user, self-hosted app (no login). One coherent
-// product in the accel-scope design system (espresso / honey / cream, Geist, the bee icon) — same visual language as
+// The Waggle console SHELL, served by src/server.ts — a single-user, self-hosted app (no login). One coherent
+// product in the Waggle design system (espresso / honey / cream, Geist, the bee icon) — same visual language as
 // the generated report (src/reportHtml.ts).
 //
 // Real routing: /connect · /ask · /run · /report · /memory · /settings (history API; server serves this SPA for every
@@ -2352,7 +2352,7 @@ ${REMEDIATION_MD_JS}
     var cap=(s.runBudget!=null?s.runBudget:state.runBudget);
     var eff=(s.effectiveRunBudget!=null?s.effectiveRunBudget:state.effectiveRunBudget);
     var h='<div class="set-wrap">'
-      +'<div class="set-headrow"><h1 class="set-title">Settings</h1><span class="mono set-ver">accel-scope'+(s.version?' v'+esc(String(s.version).replace(/^v/,'')):'')+'</span></div>';
+      +'<div class="set-headrow"><h1 class="set-title">Settings</h1><span class="mono set-ver">Waggle'+(s.version?' v'+esc(String(s.version).replace(/^v/,'')):'')+'</span></div>';
     // API keys
     h+='<section class="rd-card set-sec" id="setKeys"><div class="set-sec-h"><h2>API keys</h2><span class="sbadge '+(keys.ready?'ok':'warn')+'">'+(keys.ready?'ready':'Anthropic key needed')+'</span></div>'
       +'<p class="set-lead"><b>'+esc(BILLING_NOTE)+'</b></p>'
@@ -2389,7 +2389,7 @@ ${REMEDIATION_MD_JS}
     var show=keysMissing()&&currentView()!=='settings';
     host.hidden=!show; if(!show){ host.innerHTML=''; return; }
     host.innerHTML='<div class="fr-head"><span class="fr-ico" aria-hidden="true">✦</span><div><div class="fr-title">Add your Anthropic API key to get started</div>'
-      +'<div class="fr-sub">accel-scope runs its agents on your own key. Quick Ask and Full Scan stay disabled until a key is set. '+esc(BILLING_NOTE)+' <a href="/settings" data-act="go-settings">More options in Settings</a></div></div></div>'
+      +'<div class="fr-sub">Waggle runs its agents on your own key. Quick Ask and Full Scan stay disabled until a key is set. '+esc(BILLING_NOTE)+' <a href="/settings" data-act="go-settings">More options in Settings</a></div></div></div>'
       +keyFormHtml('fr',(state.settings&&state.settings.keys)||{},false);
   }
   // Telemetry notice: shown once (until OK / Turn off) while telemetry is on.
@@ -2398,7 +2398,7 @@ ${REMEDIATION_MD_JS}
     var t=state.settings&&state.settings.telemetry;
     var show=!!(t&&t.enabled&&!t.noticeShown);
     host.hidden=!show; if(!show){ host.innerHTML=''; return; }
-    host.innerHTML='<span class="tb-txt">accel-scope sends anonymous usage counts (run type, duration, cost range, finding counts) to help improve it &mdash; never your code, questions, findings or keys. <a href="/settings" data-act="go-settings">What is sent?</a></span>'
+    host.innerHTML='<span class="tb-txt">Waggle sends anonymous usage counts (run type, duration, cost range, finding counts) to help improve it &mdash; never your code, questions, findings or keys. <a href="/settings" data-act="go-settings">What is sent?</a></span>'
       +'<span class="tb-btns"><button type="button" class="btn honey" data-act="telemetry-ok">OK</button><button type="button" class="btn ghost" data-act="telemetry-off">Turn off</button></span>';
   }
   // The message under a blocked Quick Ask / Full Scan (no Anthropic key yet).
@@ -3132,7 +3132,7 @@ ${REMEDIATION_MD_JS}
     host.innerHTML='<div class="rd-stack">'
       +'<div class="rd-card">'
       +'<div class="cfg-head"><div class="cfg-head-l"><span class="cfg-eyebrow">NEW RUN</span><span class="cfg-title">Configure a full scan</span></div><button class="cfg-cancel" data-act="cancel-config">Cancel</button></div>'
-      +'<p class="cfg-intro">Point accel-scope at your connected sources — read-only. First <b>Comprehend</b> classifies your system and picks the expert <b>bundles</b> (areas such as Data Eng or Security) that fit; each bundle then poses and measures problems end-to-end.</p>'
+      +'<p class="cfg-intro">Point Waggle at your connected sources — read-only. First <b>Comprehend</b> classifies your system and picks the expert <b>bundles</b> (areas such as Data Eng or Security) that fit; each bundle then poses and measures problems end-to-end.</p>'
       +'<div class="cfg-grid">'
       +'<div class="cfg-col">'
       +'<span class="eyebrow cfg-lab">Scope label</span>'
@@ -3232,7 +3232,7 @@ ${REMEDIATION_MD_JS}
   function compatPill(c){
     if(!c) return '';
     if(c.compat==='ok') return '<span class="sbadge ok">✓ compatible</span>';
-    if(c.compat==='code_changed') return '<span class="sbadge" title="made by an earlier version of accel-scope — resuming still works; results may differ slightly">older build · reusable</span>';   // polish: plain words, not the producer-SHA compatWhy
+    if(c.compat==='code_changed') return '<span class="sbadge" title="made by an earlier version of Waggle — resuming still works; results may differ slightly">older build · reusable</span>';   // polish: plain words, not the producer-SHA compatWhy
     return '<span class="sbadge err" title="'+esc(c.compatWhy||'stage schema mismatch — fail-closed')+'">✗ incompatible</span>';
   }
   // Incremental re-scan note (run hero: first max lines; Checkpoints card: all — which lanes were reused, why the rest re-ran).
@@ -5346,7 +5346,7 @@ export function renderApp(opts?: { version?: string; runMode?: 'agentic' | 'dete
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>accel-scope</title>
+<title>Waggle</title>
 <link rel="icon" type="image/png" href="${BEE_DATA_URI}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5359,8 +5359,8 @@ export function renderApp(opts?: { version?: string; runMode?: 'agentic' | 'dete
 <a class="skip-link" href="#mainContent" data-act="skip-main">Skip to main content</a>
 <aside class="sidebar">
   <div class="side-brand">
-    <span class="bee"><img src="${BEE_DATA_URI}" alt="accel-scope" style="width:100%;height:100%;display:block;object-fit:cover;"></span>
-    <div style="display:flex;flex-direction:column"><span class="nm">accel-scope</span><span class="eb">code &amp; data audit</span></div>
+    <span class="bee"><img src="${BEE_DATA_URI}" alt="Waggle" style="width:100%;height:100%;display:block;object-fit:cover;"></span>
+    <div style="display:flex;flex-direction:column"><span class="nm">Waggle</span><span class="eb">code &amp; data audit</span></div>
   </div>
   <button class="side-cta" data-act="newchoose" title="New" aria-label="New"><span style="font-size:17px;line-height:0;margin-top:-1px">+</span> New</button>
   <div class="side-eyebrow">Workspace</div>

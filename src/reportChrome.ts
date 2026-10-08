@@ -1,4 +1,4 @@
-// Shared visual chrome for accel-scope HTML reports — the ONE design system behind both the
+// Shared visual chrome for Waggle HTML reports — the ONE design system behind both the
 // Full-Scan audit report (templateReportHtml.ts) and the Quick Ask scoped report (scopedTemplateHtml.ts), so
 // the two read as ONE product. It holds the pieces that must be identical across reports:
 //   • REPORT_CSS  — the design-system <style> block (tokens + components, theme-aware light/dark)
@@ -313,7 +313,7 @@ ${REPORT_CSS}${extraCss ? `\n${extraCss}` : ''}
 // The ONE product brand string. Reports once carried several spellings of the brand (reversed word order, stray
 // product names in the masthead alt text and the Quick Ask wordmark). Every report renderer, the normalizer brief
 // and this chrome use this spelling; brandConsistency.test.ts scans the renderer sources.
-export const BRAND_NAME = 'accel-scope';
+export const BRAND_NAME = 'Waggle';
 
 // Reports are served under REPORT_CSP (style-src/font-src allow inline + data: only — reports are self-contained by
 // contract), so a Google Fonts <link> is blocked, logs a CSP console error on every report view and loads nothing
@@ -324,9 +324,9 @@ export function stripExternalFontLinks(html: string): string {
 }
 
 // The same for MODEL-authored HTML (the free-vibe reports), which no renderer controls: an author may hard-code its
-// own casing ("ACCEL SCOPE · AUDIT"). Rewrites any casing / separator of the brand in TEXT only —
+// own casing (all capitals, say) or the product's former name. Rewrites either, in any casing / separator, in TEXT only —
 // tags, attributes, <script> and <style> are left alone (a CSS text-transform stays the author's choice).
-const BRAND_VARIANT = /\baccel[\s-]*scope\b/gi;
+const BRAND_VARIANT = /\b(?:accel[\s-]*scope|waggle)\b/gi;
 export function normalizeBrand(html: string): string {
   return String(html ?? '').split(/(<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>|<[^>]*>)/i)
     .map((seg) => (seg.startsWith('<') ? seg : seg.replace(BRAND_VARIANT, BRAND_NAME)))

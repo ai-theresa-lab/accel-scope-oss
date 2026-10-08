@@ -136,7 +136,7 @@ test('v0 is byte-STABLE, and the exact ways it diverges from main are enumerated
   //   6. OPEN-SOURCE CLEANUP: the language machinery was removed outright — the glossary lists English terms only,
   //      the vocabulary-rule examples are English, the per-arm language lines and the second-language budget are
   //      gone — so BOTH digest and author hashes moved. Shared by every arm, not a variant.
-  //   7. BRAND + NEUTRAL WORDING: the shared house-style block names the product as accel-scope, and the shared
+  //   7. BRAND + NEUTRAL WORDING: the shared house-style block names the product as Waggle, and the shared
   //      prompt text speaks of the user rather than a client — author hashes only. Shared by every arm.
   //
   // So this test is a STABILITY pin, not an identity proof: it catches an unintended change to either v0
@@ -145,9 +145,10 @@ test('v0 is byte-STABLE, and the exact ways it diverges from main are enumerated
   // into the control, then update the hash. Never update it just to make a red test green.
   //      The vibe author prompt's own opening line now says "English business report" — author
   //      hashes only.
+  //    · The product was renamed (the house-style brand line names it) — author hashes only.
   const expected = {
-    nokindDigest: 'ff70f4448d7fb9af', nokindAuthor: '455666441ae844ee',
-    kindDigest: '60628c39c88d9b18', kindAuthor: 'c111a9fe5494df5a',
+    nokindDigest: 'ff70f4448d7fb9af', nokindAuthor: 'ba26e467b7e28784',
+    kindDigest: '60628c39c88d9b18', kindAuthor: '29c64adcbbaeec67',
   };
   const kind = 'Internal dev-tools / AI engineering';
   assert.equal(digest16(digestPrompt(controlOpts())), expected.nokindDigest, 'digest prompt, no classification');

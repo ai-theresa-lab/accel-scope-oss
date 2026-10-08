@@ -380,7 +380,7 @@ export async function githubFileAtSha(fullName: string, sha: string, path: strin
   const url = `https://api.github.com/repos/${fullName}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${sha}`;
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 10_000);
   try {
-    const r = await fetch(url, { method: 'GET', headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'accel-scope', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, signal: ctl.signal });
+    const r = await fetch(url, { method: 'GET', headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'waggle', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, signal: ctl.signal });
     return r.status === 200;
   } catch { return false; } finally { clearTimeout(t); }
 }

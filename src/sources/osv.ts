@@ -51,7 +51,7 @@ export function makeOsvSource(opts: OsvSourceOpts = {}): DataSource {
         })).filter((q) => q.package.ecosystem && q.package.name && q.version);
         if (!list.length) return ok('No valid {ecosystem, name, version} entries in the request.');
         const r = await fetch(`${OSV}/v1/querybatch`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'User-Agent': 'accel-scope' },
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'User-Agent': 'waggle' },
           body: JSON.stringify({ queries: list }),
         });
         if (r.status === 429) return ok('OSV.dev is rate-limited (HTTP 429) — retry shortly with a smaller batch.');
@@ -77,7 +77,7 @@ export function makeOsvSource(opts: OsvSourceOpts = {}): DataSource {
       try {
         const vid = String(id ?? '').trim();
         if (!/^[A-Za-z0-9._-]{4,60}$/.test(vid)) return ok(`Invalid advisory id "${vid}".`);
-        const r = await fetch(`${OSV}/v1/vulns/${encodeURIComponent(vid)}`, { headers: { 'User-Agent': 'accel-scope' } });
+        const r = await fetch(`${OSV}/v1/vulns/${encodeURIComponent(vid)}`, { headers: { 'User-Agent': 'waggle' } });
         if (r.status === 404) return ok(`No OSV advisory with id ${vid}.`);
         if (!r.ok) return ok(`OSV lookup failed (HTTP ${r.status}) for ${vid}.`);
         const d = (await r.json()) as any;

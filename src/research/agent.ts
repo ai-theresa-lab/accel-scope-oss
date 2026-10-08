@@ -153,6 +153,19 @@ export function withinDir(target: string, rootReal: string): boolean {
   return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
 }
 
+// A glob pattern stays inside the analysis root iff it never steps up (`..`, brace sets included, so `{..,x}/**` is
+// refused) and, when absolute, its fixed prefix (everything before the first glob character) is inside the root.
+// A relative pattern resolves under the tool's `path`, which is confined separately.
+export function globWithinDir(pattern: string, rootReal: string): boolean {
+  const g = pattern.replace(/\\/g, '/');
+  if (/(^|[/{,])\.\.([/},]|$)/.test(g)) return false;
+  if (g.startsWith('~')) return false;
+  if (!(g.startsWith('/') || /^[A-Za-z]:/.test(g))) return true;
+  const firstGlob = g.search(/[*?[{]/);
+  const fixed = firstGlob < 0 ? g : g.slice(0, g.lastIndexOf('/', firstGlob) + 1);
+  return withinDir(fixed || '/', rootReal);
+}
+
 // A hard auth failure (bad/expired/revoked credential) vs a transient error. Anchored to
 // auth signals so it does NOT swallow maxTurns / timeout / 429 / 5xx (those still fail-open).
 export function isAuthError(msg: string): boolean {
@@ -286,6 +299,13 @@ export async function runAgent(opts: RunAgentOpts): Promise<AgentRun> {
         const confineTo = (writeOk && writeRootReal) ? writeRootReal : rootReal;
         if (p && !withinDir(p, confineTo)) {
           return { behavior: 'deny' as const, message: `confined to the ${writeOk && writeRootReal ? 'report output' : 'analysis'} directory: blocked a path outside it (e.g. /proc, credentials, or the audited source): ${p.slice(0, 80)}` };
+        }
+        // Glob's `pattern` and Grep's `glob` are paths too: an absolute or `..` pattern would list files outside it.
+        const pat = String((input as { pattern?: unknown }).pattern ?? '');
+        const globs = [toolName === 'Glob' ? pat : '', String((input as { glob?: unknown }).glob ?? '')].filter(Boolean);
+        const escaping = globs.find((g) => !globWithinDir(g, rootReal));
+        if (escaping) {
+          return { behavior: 'deny' as const, message: `confined to the analysis directory: a glob pattern may not point outside it or contain '..': ${escaping.slice(0, 80)}` };
         }
         return { behavior: 'allow' as const };
       },

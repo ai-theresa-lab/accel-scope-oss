@@ -1,4 +1,4 @@
-// Everything accel-scope ingests is a DataSource behind ONE uniform adapter
+// Everything Waggle ingests is a DataSource behind ONE uniform adapter
 // interface. The orchestration is source-agnostic: it connects whatever sources
 // exist and the invariant-checkers query across them. Supporting a new company/
 // stack = registering adapters — zero change to invariants or orchestration.

@@ -1,4 +1,4 @@
-// Real GitHub connector — the read-only way accel-scope ingests a project's repos.
+// Real GitHub connector — the read-only way Waggle ingests a project's repos.
 // Only Node built-ins: global fetch for the REST API, node:crypto to sign the
 // GitHub App JWT (RS256), execFile to clone over HTTPS with a short-lived token.
 // No new dependency, no shell (execFile, not exec). Everything here is read-only.
@@ -22,7 +22,7 @@ function headers(token: string): Record<string, string> {
   return {
     Authorization: `Bearer ${token}`,
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'accel-scope',
+    'User-Agent': 'waggle',
     'X-GitHub-Api-Version': '2022-11-28',
   };
 }
@@ -291,7 +291,7 @@ export function appJwt(appId: string, privateKeyPem: string): string {
 // auto-reconnect after a restart without making the user re-install.
 export async function listInstallations(appId: string, pem: string): Promise<{ id: number; account: string }[]> {
   const jwt = appJwt(appId, pem);
-  const r = await fetch(`${GH}/app/installations?per_page=100`, { headers: { Authorization: `Bearer ${jwt}`, Accept: 'application/vnd.github+json', 'User-Agent': 'accel-scope' } });
+  const r = await fetch(`${GH}/app/installations?per_page=100`, { headers: { Authorization: `Bearer ${jwt}`, Accept: 'application/vnd.github+json', 'User-Agent': 'waggle' } });
   if (!r.ok) throw new Error(`list installations failed (HTTP ${r.status})`);
   const arr = (await r.json()) as any[];
   return (arr ?? []).map((x) => ({ id: x.id, account: x.account?.login ?? 'account' }));
@@ -301,7 +301,7 @@ export async function installationToken(appId: string, pem: string, installation
   const jwt = appJwt(appId, pem);
   const r = await fetch(`${GH}/app/installations/${installationId}/access_tokens`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${jwt}`, Accept: 'application/vnd.github+json', 'User-Agent': 'accel-scope' },
+    headers: { Authorization: `Bearer ${jwt}`, Accept: 'application/vnd.github+json', 'User-Agent': 'waggle' },
   });
   if (!r.ok) throw new Error(`installation token request failed (HTTP ${r.status})`);
   const d = (await r.json()) as any;
@@ -340,7 +340,7 @@ export function oauthAuthorizeUrl(clientId: string, redirectUri: string, state: 
 export async function oauthExchange(clientId: string, clientSecret: string, code: string, redirectUri: string): Promise<string> {
   const r = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': 'accel-scope' },
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': 'waggle' },
     body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, code, redirect_uri: redirectUri }),
   });
   const d = (await r.json()) as any;

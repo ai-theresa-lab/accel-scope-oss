@@ -5,11 +5,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { uploadRelPaths, writeUploadedFiles } from './uploadedFolder.ts';
 
-// An uploaded `accel-scope` folder was scanned as `accel-scope/accel-scope/src/…`, because the
+// An uploaded `Waggle` folder was scanned as `Waggle/Waggle/src/…`, because the
 // browser's webkitRelativePath carries the picked folder's name and the writer kept it.
 
 test('the shared leading segment equal to the folder name is stripped', () => {
-  assert.deepEqual(uploadRelPaths(['accel-scope/package.json', 'accel-scope/src/server.ts', 'accel-scope\\.github\\workflows\\ci.yml'], 'accel-scope'),
+  assert.deepEqual(uploadRelPaths(['Waggle/package.json', 'Waggle/src/server.ts', 'Waggle\\.github\\workflows\\ci.yml'], 'Waggle'),
     ['package.json', 'src/server.ts', '.github/workflows/ci.yml']);
 });
 
@@ -27,14 +27,14 @@ test('writeUploadedFiles lands the folder at the snapshot root and never escapes
   const base = mkdtempSync(join(tmpdir(), 'upl-'));
   try {
     const n = writeUploadedFiles(base, [
-      { path: 'accel-scope/package.json', content: '{}' },
-      { path: 'accel-scope/src/server.ts', content: 'x' },
-      { path: 'accel-scope/../escape.txt', content: 'no' },
-    ], 'accel-scope');
+      { path: 'Waggle/package.json', content: '{}' },
+      { path: 'Waggle/src/server.ts', content: 'x' },
+      { path: 'Waggle/../escape.txt', content: 'no' },
+    ], 'Waggle');
     assert.equal(n, 2);
     assert.equal(readFileSync(join(base, 'package.json'), 'utf8'), '{}');
     assert.ok(existsSync(join(base, 'src', 'server.ts')));
-    assert.ok(!existsSync(join(base, 'accel-scope')), 'no nested folder-name level');
+    assert.ok(!existsSync(join(base, 'Waggle')), 'no nested folder-name level');
     assert.ok(!existsSync(join(base, '..', 'escape.txt')));
   } finally { rmSync(base, { recursive: true, force: true }); }
 });

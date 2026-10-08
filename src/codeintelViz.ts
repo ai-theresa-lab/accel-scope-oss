@@ -9,7 +9,7 @@
 // The charts are ARGUMENT tools (each states one conclusion at a glance), not exploration tools: a
 // service system-map with the shared-database dependency CYCLES in red, the shared-table
 // definition-drift map, cross-repo hidden coupling, and per-repo defect-risk health. We author our
-// own inline SVG (self-contained, no CDN) in the accel-scope brand — repowise's charts are the type
+// own inline SVG (self-contained, no CDN) in the Waggle brand — repowise's charts are the type
 // reference, never the code (AGPL: the plane is a subprocess boundary, nothing is vendored).
 //
 // Two TIERS mirror the report rubric. `area` renders real identifiers (engineers navigate by them).
