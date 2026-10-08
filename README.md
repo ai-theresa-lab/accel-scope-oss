@@ -1,20 +1,78 @@
-# Waggle
+# 🐝 Waggle
 
-*Formerly accel-scope.* Like a scout bee's waggle dance, it goes out into your code and comes back with what matters.
+[![Test](https://github.com/ai-theresa-lab/waggle/actions/workflows/test.yml/badge.svg)](https://github.com/ai-theresa-lab/waggle/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/ai-theresa-lab/waggle)](https://github.com/ai-theresa-lab/waggle/releases)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522.7-339933)](package.json)
 
-**Point an AI auditor at your repositories (and, optionally, your warehouse) and get an evidence-backed report plus a fix plan your coding agent can run.**
+**Waggle audits a codebase (and, optionally, the data behind it) the way a careful reviewer would: it states falsifiable hypotheses, measures them against the code and data, lets an adversarial auditor attack every claim, and reports only what survives — with the evidence attached.**
+
+> [!NOTE]
+> Waggle was previously released as **accel-scope**. The name comes from the honeybee's *waggle dance*: a scout explores, comes back, and tells the hive exactly where to look. Waggle is self-hosted, single-user, runs on your own model keys, and never writes to the code or data it inspects.
 
 ![Waggle console](docs/screenshot.png)
 
-Waggle runs on your machine. It clones the code you select read-only, lets a team of Claude agents investigate it, verifies every claim against the code, and writes two reports: a short **Leadership** brief (what matters and what to decide) and an **Execution** report (every finding with evidence, the fix, how to verify it, and a `REMEDIATION.md` you can hand to a coding agent).
+**Contents:** [Overview](#overview) · [Method](#method) · [Quick start](#quick-start) · [Usage](#usage) · [Expert lenses](#expert-lenses) · [Connectors](#connectors) · [Privacy and telemetry](#privacy-and-telemetry) · [Limitations](#limitations-and-threats-to-validity) · [Citation](#citation)
 
-## What it does
+## Overview
 
-- **Quick Ask** — ask one question about your code or data ("Where do we compute monthly revenue, and do the two dashboards agree?"). One agent investigates and answers with cited evidence. Typically $0.30–1.
-- **Full Scan** — a whole-repo audit. A comprehension agent decides which expert lenses apply (security & supply chain, architecture & code health, release engineering, API stability, business logic, data trust, mobile, multi-tenancy, …); each lens poses falsifiable hypotheses and measures them against the code and connected data. Claims are re-checked by an adversarial audit before they reach the report. Typically $5–30.
-- **Incremental re-scan** — scanning the same code again reuses everything the changes did not touch and reports what is new, fixed, or still open since the last scan.
-- **Memory** — durable notes about your projects (metric definitions, known traps, conventions) that later runs recall as prior context. Stored locally; editable and revertable.
-- **Read-only, always** — agents can read and query; they cannot write to your repos or data sources.
+### Context
+
+- Language models can now read an entire repository. Asked to "review this code", they produce fluent, plausible findings — but it is hard to tell which claims were actually checked, which were inferred, and which are wrong.
+- A single pass tends to mirror the question: models agree with the premise they are given, and there is no record of what was ruled out.
+- Many of the questions that matter cross the boundary between code and data ("why do these two dashboards disagree?", "does this permission check hold for every tenant?"). Answering them needs measurements, not opinions.
+
+### Approach
+
+Waggle treats an audit as **hypothesis testing** rather than summarization:
+
+- **Falsifiable problems, not opinions.** Each expert lens poses problems that state what evidence would confirm or refute them, seeded by deterministic evidence (git history, repository structure, committed secrets).
+- **Measurement on read-only planes.** Agents measure each problem against the cloned workspace and any connected data plane (warehouse SQL, key-value stores, MCP servers, vulnerability advisories) and return a verdict with the evidence used.
+- **Adversarial claim audit.** A separate audit stage re-checks every claim against the workspace before it can reach a report.
+- **Evidence gate.** A claim whose evidence does not resolve to the code or data becomes an *open question* (a coverage gap), not a finding. Checks that ran and came back negative are reported as *ruled out*.
+- **Two audiences, one record.** A short Leadership brief (what matters, what to decide) and an Execution report (every finding with its evidence, fix, expected effect, "done when" and "how to verify", plus a `REMEDIATION.md` a coding agent can run).
+
+### What it is not
+
+Not a linter, a SAST rule engine or a test runner, and not a replacement for them: Waggle reads their kind of evidence and asks the questions they cannot express. It does not modify your repositories or data, and it does not run your code.
+
+## Method
+
+```mermaid
+flowchart LR
+  W["Workspace<br/>repos @ pinned SHAs,<br/>local folders"] --> C["Comprehend<br/>classify the system,<br/>choose lenses"]
+  C --> B1["Lens 1<br/>Critique → Preflight → Expert"]
+  C --> B2["Lens 2<br/>Critique → Preflight → Expert"]
+  C --> B3["Lens n<br/>…"]
+  P[("Read-only planes<br/>code · SQL · KV · MCP · OSV")] -.-> B1 & B2 & B3
+  B1 & B2 & B3 --> A["Claim audit<br/>adversarial re-check"]
+  A --> S["Synthesis<br/>themes, bottom line"]
+  S --> F["Evidence-gated findings<br/>+ ruled out + open questions"]
+  F --> R1["Leadership brief"]
+  F --> R2["Execution report<br/>+ REMEDIATION.md"]
+```
+
+| Stage | What happens |
+|---|---|
+| **Comprehend** | Classifies the system, maps its product capabilities and chooses which expert lenses apply. |
+| **Critique** | Per lens, poses evidence-seeded, falsifiable problems. |
+| **Preflight** | Lints the plan: what to measure, and on which plane. |
+| **Expert** | Measures each problem against the code and data planes and returns verdicts and mitigations. Lenses run in parallel. |
+| **Claim audit** | Adversarially re-checks every claim against the workspace; unsupported wording is downgraded or removed. |
+| **Synthesis** | Groups verdicts into themes and a bottom line. |
+| **Findings** | A deterministic, evidence-gated finding contract (no model in this step). |
+| **Reports** | The Leadership brief is model-written under a rubric-checked contract; the Execution report is rendered deterministically. |
+
+Engineering properties that make runs inspectable and repeatable:
+
+- **Read-only by construction** — agents get a default-deny tool allowlist (read, search, and mounted read-only data tools), and file access is confined to the workspace.
+- **Bounded cost** — a per-run ledger attributes every model call; past 80% of the cap no new work starts.
+- **Fail open, visibly** — a failed agent or connector is recorded as a *degraded stage* on the run instead of silently shrinking coverage.
+- **Checkpoints** — every stage boundary is checkpointed, so a stopped or failed run resumes without repeating finished work.
+- **Incremental re-scans** — unchanged code replays prior findings at no cost; findings are carried forward as new / fixed / persisting, and a finding is only called *fixed* when its code actually changed.
+- **Memory as prior, not evidence** — durable notes (metric definitions, known traps) are recalled as context to re-verify, never cited as proof.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the module-level design.
 
 ## Quick start
 
@@ -26,7 +84,7 @@ npm ci
 ANTHROPIC_API_KEY=sk-ant-... npm start
 ```
 
-Open <http://localhost:4317>. (You can also leave the key out and paste it in **Settings → API keys**.)
+Open <http://localhost:4317>. (You can also leave the key out and paste it in **Settings → API keys**, or rely on an existing local `claude` login.)
 
 With Docker:
 
@@ -34,6 +92,15 @@ With Docker:
 docker build -t waggle .
 docker run --rm -p 127.0.0.1:4317:4317 -v waggle-data:/data -e ANTHROPIC_API_KEY=sk-ant-... waggle
 ```
+
+## Usage
+
+| Mode | What it does | Typical cost |
+|---|---|---|
+| **Quick Ask** | One question about your code or data ("Where do we compute monthly revenue, and do the two dashboards agree?"). One agent investigates and answers with cited evidence. | $0.30–1 |
+| **Full Scan** | The whole method above, over the repos and data planes you select. | $5–30 |
+| **Incremental re-scan** | Scanning the same targets again reuses everything the changes did not touch and reports what is new, fixed or still open. | a fraction of a Full Scan |
+| **Memory** | Durable, editable, revertable notes about your projects that later runs recall as prior context. | — |
 
 ## API keys and cost
 
@@ -55,6 +122,23 @@ Every run has a spend cap, **$20 by default** — change it in **Settings → Sp
 3. Watch the pipeline live. When it completes, open the **Leadership** report first; the **Execution** report has the details and the `REMEDIATION.md` export.
 
 Private code: connect a GitHub personal access token with read-only access, or a **local folder** on this machine (or upload one from the browser).
+
+## Expert lenses
+
+Comprehend chooses among the built-in lenses (their IDs also appear in telemetry). Lenses are *value-free*: they describe methods and checks, never one organization's answers.
+
+| ID | Lens |
+|---|---|
+| `appsec` | Application security / supply chain |
+| `swe-arch` | Software architecture & code health |
+| `release-eng` | Build / CI / release engineering |
+| `api-stability` | Public API stability / SDK developer experience |
+| `product-logic` | Business rules & application logic |
+| `saas-tenancy` | Multi-tenant access & isolation |
+| `baseline`, `analytics`, `data-eng` | Data & metric trust, analytics, pipelines / warehouse |
+| `trust-safety` | Trust & safety |
+| `mobile-ios`, `mobile-android` | Mobile apps |
+| `recsys-mle` | Recommendation / ranking systems |
 
 ## Connectors
 
@@ -117,16 +201,39 @@ Reports are generated by language models from code you scan, so they are served 
 | `THERESA_OSV` | off | OSV vulnerability lookups run automatically for public-only scans; `1` also allows them for private code (package names and versions are sent to api.osv.dev). |
 | `THERESA_MEMORY` | on | `off` disables memory recall and writes. |
 
-## Limitations
+## Limitations and threats to validity
 
-- Requires an Anthropic key (or a Claude login); an OpenAI-only setup is not supported yet.
-- One heavy run at a time; further Full Scans queue.
-- Findings are produced by language models and verified against the code, but they can still be wrong. Each one carries its evidence and a "how to verify" step — check before you act.
-- Scanning very large monorepos is slow and expensive; select the repos or folders that matter.
+- **Model judgement.** Verdicts are produced by language models. The claim audit and the evidence gate reduce unsupported claims but do not eliminate wrong ones. Every finding carries its evidence and a "how to verify" step — check before you act.
+- **No public benchmark yet.** We have not published a precision / recall evaluation against a labeled set of known issues. Contributions of labeled audit targets are very welcome.
+- **Coverage follows the lenses.** An issue outside every chosen lens can be missed. The Execution report lists what was ruled out and what stayed open, so the absence of a finding is not evidence of absence.
+- **Run-to-run variation.** Two scans of the same code can phrase, rank or group findings differently. Incremental re-scans reduce churn by carrying findings forward.
+- **Cost and scale.** Very large monorepos are slow and expensive; select the repos or folders that matter. One heavy run at a time; further Full Scans queue.
+- **Providers.** Requires an Anthropic key (or a Claude login); an OpenAI-only setup is not supported yet.
+
+## Documentation
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — pipeline, planes, checkpoints, incremental re-scan, memory, reports
+- [SECURITY.md](SECURITY.md) — threat model and how to report a vulnerability
+- [CONTRIBUTING.md](CONTRIBUTING.md) — development setup and checks
+- [telemetry-collector/](telemetry-collector/) — the telemetry schema and collector source
 
 ## Contributing
 
-Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Run `npm run typecheck`, `npm test` and `npm run check:english` before opening a PR.
+Issues and pull requests are welcome — especially new expert lenses, read-only connectors, evaluation targets and documentation. See [CONTRIBUTING.md](CONTRIBUTING.md). Run `npm run typecheck`, `npm test` and `npm run check:english` before opening a PR.
+
+## Citation
+
+If you use Waggle in research or a write-up, please cite:
+
+```bibtex
+@software{waggle_2026,
+  title  = {{Waggle}: Evidence-Gated, Hypothesis-Driven Auditing of Code and Data with LLM Agents},
+  author = {{AI Theresa}},
+  year   = {2026},
+  url    = {https://github.com/ai-theresa-lab/waggle},
+  note   = {Formerly accel-scope}
+}
+```
 
 ## License
 
