@@ -254,15 +254,69 @@ export function fileEvidenceResolves(ref: string, root: string): boolean {
       for (const d of readdirNames(absRoot)) { const c = resolve(absRoot, d, path); if (inside(c)) candidates.push(c); }
     } catch { /* unreadable root → only the direct candidate */ }
   }
-  for (const c of candidates) {
-    let st;
-    try { st = statSync(c); } catch { continue; }
-    if (line == null) return true;
-    if (!st.isFile()) continue;
-    if (st.size > 8 * 1024 * 1024) return true;
-    try { if (line <= readFileSync(c, 'utf8').split('\n').length) return true; } catch { /* unreadable → next */ }
-  }
-  return false;
+  for (const c of candidates) if (pathHoldsLine(c, line)) return true;
+  return !isAbsolute(path) && uniqueSuffixMatch(path, line, absRoot) !== null;
+}
+function pathHoldsLine(abs: string, line: number | undefined): boolean {
+  let st;
+  try { st = statSync(abs); } catch { return false; }
+  if (line == null) return true;
+  if (!st.isFile()) return false;
+  if (st.size > 8 * 1024 * 1024) return true;
+  try { return line <= readFileSync(abs, 'utf8').split('\n').length; } catch { return false; }
+}
+
+// A cite that drops leading directories (`cache.js:10` for `repo/src/cache.js`) still names ONE file when exactly one
+// workspace file ends with that path. Then it resolves — and canonicalFileRef can rewrite it to the full path. Two or
+// more candidates (`index.js`) stay unresolved: the cite is ambiguous.
+const INDEX_SKIP = new Set(['.git', 'node_modules', '.venv', 'venv', '__pycache__', 'dist', 'build', '.next', 'target', 'vendor']);
+const INDEX_MAX_FILES = 50_000;
+const indexCache = new Map<string, { at: number; files: string[] }>();
+export function workspaceFileIndex(absRoot: string): string[] {
+  const hit = indexCache.get(absRoot);
+  if (hit && Date.now() - hit.at < 60_000) return hit.files;
+  const files: string[] = [];
+  const walk = (dir: string, rel: string, depth: number): void => {
+    if (depth > 16 || files.length >= INDEX_MAX_FILES) return;
+    let names: string[];
+    try { names = readdirSync(dir); } catch { return; }
+    for (const n of names) {
+      if (files.length >= INDEX_MAX_FILES) return;
+      const abs = join(dir, n);
+      const r = rel ? `${rel}/${n}` : n;
+      let st;
+      try { st = statSync(abs); } catch { continue; }
+      if (st.isDirectory()) { if (!INDEX_SKIP.has(n)) walk(abs, r, depth + 1); }
+      else if (st.isFile()) files.push(r);
+    }
+  };
+  walk(absRoot, '', 0);
+  indexCache.set(absRoot, { at: Date.now(), files });
+  return files;
+}
+function uniqueSuffixMatch(path: string, line: number | undefined, absRoot: string): string | null {
+  const want = path.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!want || want.split('/').some((seg) => seg === '..' || seg === '.' || seg === '')) return null;
+  const hits = workspaceFileIndex(absRoot).filter((f) => f === want || f.endsWith('/' + want));
+  if (hits.length !== 1) return null;
+  return pathHoldsLine(resolve(absRoot, hits[0]), line) ? hits[0] : null;
+}
+
+/** A file ref rewritten to its workspace-relative path when it resolves only through a unique suffix match
+ *  (`cache.js:10` → `repo/src/cache.js:10`); the ref unchanged when it resolves as cited; null when it does not. */
+export function canonicalFileRef(ref: string, root: string): string | null {
+  if (!fileEvidenceResolves(ref, root)) return null;
+  const { path, line } = parseFileRef(ref);
+  if (isAbsolute(path) || /^[a-z][a-z0-9+.-]*:\/\//i.test(path) || /[*?[\]{}]/.test(path)) return ref;
+  const absRoot = resolve(root);
+  let dirs: string[] = [];
+  try { dirs = readdirNames(absRoot); } catch { /* unreadable root */ }
+  if ([resolve(absRoot, path), ...dirs.map((d) => resolve(absRoot, d, path))].some((c) => pathHoldsLine(c, line))) return ref;
+  const full = uniqueSuffixMatch(path, line, absRoot);
+  if (!full) return ref;
+  const trimmed = ref.trim();
+  const at = trimmed.indexOf(path);
+  return at >= 0 ? trimmed.slice(0, at) + full + trimmed.slice(at + path.length) : full;
 }
 function readdirNames(dir: string): string[] {
   // Immediate child DIRECTORIES of the workspace root (the cloned/copied repos). statSync per entry keeps this free of

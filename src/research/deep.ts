@@ -403,6 +403,17 @@ IMPORTANT — pick the right mode for THIS metric:
   COMPUTE IT LIVE on the matching mounted plane above and
   bind a real "value" — never downgrade it to a proposal. This is the common case for serving / exposure / product
   / metric-definition leads, and for architecture / CI / release / API-stability / supply-chain leads when the code-native planes are mounted.
+- CODE-READABLE (the claim is about what the code itself does or omits — a missing call, an unbounded structure, an
+  absent guard / check / limit, a wrong condition or order — and reading the code settles it, without running it):
+  measure it STATICALLY. Read the exact lines, bind "value" to a count taken from the code (e.g. 0 delete calls on the
+  expiry path, 2 unguarded writes), and set "source" to "code-trace: <file:line>, <file:line>" naming the lines you
+  read. Do NOT recast such a claim as a runtime metric that needs an eval — that defers a defect the code already
+  shows. Use this mode only when the code alone decides it; when the answer depends on runtime data, load or
+  configuration you cannot see, use the other modes. Before you call it a defect, check whether the project
+  states this behavior as intended — its README / docs, type declarations or doc comments, or a test that
+  asserts it. Documented or tested intended behavior (including a documented limitation or trade-off with an
+  opt-in alternative) is a design choice, not a defect: set "supportsClaim": false and say where it is documented
+  in "note". If your own note would call it "not a defect", it is not one.
 - ML-EVAL ONLY (recall@k against the full catalog, AUC, embedding cone, sole-rate — needs a training/eval job):
   you are READ-ONLY and CANNOT run that job, so you generally cannot compute it yourself from raw data. If no
   datapoint exists, no live probe is mounted, AND it is not computable from any mounted data plane, the CORRECT answer is the
@@ -427,7 +438,7 @@ Reply with EXACTLY ONE fenced \`\`\`json block and nothing after it:
  "parent":{"id":"<named parent or ''>","value":<number or null>},
  "levers":["<single-variable change vs parent, if an experiment>"],
  "guardrailTraded": <true|false>,
- "source":"<datapoint id / probe name / 'proposed'>",
+ "source":"<datapoint id / probe name / 'code-trace: <file:line>, …' / 'proposed'>",
  "note":"<one sentence: the number vs its floor, OR — if unmeasured — why>",
  "evalProposal": {
    "metric":"${h.decisiveMetric}",
@@ -1204,6 +1215,13 @@ export function hypTitle(claim: string): string {
 // tracks what the reader received: unmeasured/blocked → deferred; else the mitigation's `supported`
 // wins (the explicit-disposition tiebreaker); else status (supported→confirmed, refuted→refuted, anything else incl.
 // measured-but-pending → deferred).
+// Text that declares the measured behaviour intended rather than a defect. Negations ("not by design", "is not
+// intended behaviour") do not match. Exported for tests.
+const NON_DEFECT_PHRASES = /(?<!\bnot\s)(?<!\bnot\s(?:an?\s)?)\b(?:by design|intended behaviou?r|documented (?:intended|design|known)\b[\w -]{0,24}|design (?:choice|trade-?off))\b|\bnot an? (?:correctness |real )?(?:defect|bug)\b/i;
+export function selfDeclaredNonDefect(texts: (string | undefined)[]): boolean {
+  return texts.some((t) => typeof t === 'string' && NON_DEFECT_PHRASES.test(t));
+}
+
 export function hypothesisDisposition(h: Hypothesis, mit?: Mitigation): 'confirmed' | 'refuted' | 'deferred' {
   const measured = Boolean(h.measurement && h.measurement.value != null);
   if (!measured || h.status === 'blocked-need-eval') return 'deferred';
@@ -1248,7 +1266,11 @@ export function hypothesesToFindings(hypotheses: Hypothesis[], mitigations: Miti
     const mit = mits.get(h.id);
     const m = h.measurement;
     const measured = Boolean(m && m.value != null);
-    const disp = hypothesisDisposition(h, mit);
+    let disp = hypothesisDisposition(h, mit);
+    // A "confirmed" defect whose own measurement note — or the claim auditor's allowed wording — says it is NOT a
+    // defect (documented / intended behaviour, a design trade-off) is ruled out rather than shipped: the agent that
+    // holds the evidence already concluded so, and a finding that argues against itself only adds noise.
+    if (disp === 'confirmed' && selfDeclaredNonDefect([m?.note, audits?.get(h.id)?.allowedWording])) disp = 'refuted';
     if (disp === 'deferred') {
       // Unsettled → a coverage gap, not a finding. (Kills the old synthetic `eval:*` evidence finding.)
       // measured-but-undisposed (no null/parent to gate) is also unsettled — its evidence exists, but the

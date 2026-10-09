@@ -91,3 +91,26 @@ test('isResolvableEvidence with a workspace root checks that file/line refs actu
     assert.equal(findingResolvesInWorkspace(f([{ kind: 'file', ref: 'nope.ts:1' }]), undefined), true);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
+
+test('a cite that leaves out leading directories resolves when exactly one workspace file matches, and is rewritten', async () => {
+  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { canonicalFileRef, fileEvidenceResolves } = await import('./schema.ts');
+  const root = mkdtempSync(join(tmpdir(), 'suffix-ref-'));
+  try {
+    mkdirSync(join(root, 'repo', 'src', 'lib'), { recursive: true });
+    mkdirSync(join(root, 'repo', 'test'), { recursive: true });
+    writeFileSync(join(root, 'repo', 'src', 'cache.js'), 'a\nb\nc\n');
+    writeFileSync(join(root, 'repo', 'src', 'lib', 'index.js'), 'x\n');
+    writeFileSync(join(root, 'repo', 'test', 'index.js'), 'y\n');
+    assert.equal(fileEvidenceResolves('cache.js:2', root), true, 'unique basename');
+    assert.equal(canonicalFileRef('cache.js:2 (get)', root), 'repo/src/cache.js:2 (get)');
+    assert.equal(canonicalFileRef('src/cache.js:3', root), 'src/cache.js:3', 'a repo-relative cite already resolves: kept as cited');
+    assert.equal(fileEvidenceResolves('cache.js:99', root), false, 'line past the end');
+    assert.equal(fileEvidenceResolves('index.js:1', root), false, 'ambiguous: two files');
+    assert.equal(canonicalFileRef('lib/index.js:1', root), 'repo/src/lib/index.js:1', 'a longer suffix disambiguates');
+    assert.equal(fileEvidenceResolves('../cache.js', root), false);
+    assert.equal(canonicalFileRef('nope.js', root), null);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
