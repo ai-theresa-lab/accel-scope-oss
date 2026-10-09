@@ -22,7 +22,8 @@ npm test
 npm run check:english
 ```
 
-CI runs the same three commands on Linux.
+CI runs the same three commands on Linux. On Windows a few tests are skipped (they need a POSIX shell or permission to
+create symlinks); everything else runs the same, and CI on Linux is the reference.
 
 ## Where things live
 

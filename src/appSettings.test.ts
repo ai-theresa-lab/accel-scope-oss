@@ -83,3 +83,11 @@ test('a credential embedded in an MCP URL never reaches the persisted form; reme
   assert.equal(back.status, 'ready');
   assert.equal(back.mcpUrl, url, 'remembered ⇒ the full URL comes back');
 });
+
+test('a restored public-URL source keeps at most GITURL_CAP repos, like the paste path', async () => {
+  const { GITURL_CAP } = await import('./sources/persist.ts');
+  const giturlRepos = Array.from({ length: GITURL_CAP + 15 }, (_, i) => ({ fullName: `owner/repo${i}` }));
+  const back = rehydratePersistedSource({ id: 'src_g', kind: 'giturl', name: 'Public GitHub URL', status: 'ready', detail: '', giturlRepos } as Partial<Source>);
+  assert.equal(back.giturlRepos?.length, GITURL_CAP);
+  assert.equal(back.giturlRepos?.[0]?.fullName, 'owner/repo0');
+});

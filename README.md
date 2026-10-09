@@ -112,7 +112,7 @@ All model usage bills **your own** API keys. Keys are only ever sent to the prov
 
 Set them in the environment, in a `.env` file in the working directory, or in **Settings → API keys** (memory only, unless you tick *Save keys on this machine*, which writes `<data dir>/keys.json` with mode 0600).
 
-Every run has a spend cap, **$20 by default** — change it in **Settings → Spending** or with `THERESA_RUN_BUDGET`. The run page shows live spend against the cap. The cap stops a run from *starting* new work; a step already in flight finishes, so the final cost can pass the cap by a small amount (the run page says so).
+Every run has a spend cap, **$20 by default** — change it in **Settings → Spending** or with `THERESA_RUN_BUDGET`. The run page shows live spend against the cap. The cap stops a run from *starting* new work; steps already in flight finish, and the final report-writing and audit steps always run, so the final cost can pass the cap — in our tests by up to about a third (for example $10.56 on an $8 cap). The run page shows how far over the cap a run went. Set the cap with that headroom in mind.
 
 ## Your first scan
 

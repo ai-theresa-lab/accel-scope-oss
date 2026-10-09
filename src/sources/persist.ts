@@ -6,6 +6,10 @@ import type { Source } from '../server.ts';
 // The raw credential fields of a Source. They are NEVER written to state.json. When the user opts in to remembering
 // connection credentials on this machine, server.ts keeps them in a separate 0600 file (connectionCredentials below).
 export const CREDENTIAL_FIELDS = ['token', 'mcpToken', 'saJson'] as const;
+
+// The most public-URL repos one source may hold. Enforced when URLs are pasted (server.ts) AND when a saved source is
+// restored here, so an edited or imported state.json cannot fan a run out to unbounded clones.
+export const GITURL_CAP = 20;
 export type SourceCredentials = Partial<Pick<Source, (typeof CREDENTIAL_FIELDS)[number] | 'mcpUrl'>>;
 
 // A connection URL can carry its own credential: userinfo (`https://user:pass@host`) or a secret-named query parameter
@@ -50,6 +54,7 @@ export function connectionCredentials(s: Source): SourceCredentials | undefined 
 // a source whose only credential was not persisted comes back status:'error' = reconnect.
 export function rehydratePersistedSource(s: Partial<Source>, creds?: SourceCredentials): Source {
   const src = { ...(s as Source), ...(creds ?? {}) };
+  if (src.kind === 'giturl' && Array.isArray(src.giturlRepos) && src.giturlRepos.length > GITURL_CAP) src.giturlRepos = src.giturlRepos.slice(0, GITURL_CAP);
   if (creds && Object.values(creds).some(Boolean)) {
     delete src.credStripped;
     return { ...src, status: 'ready' };

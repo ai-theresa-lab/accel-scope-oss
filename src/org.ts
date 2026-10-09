@@ -60,7 +60,7 @@ export async function analyzeOrg(root: string, only?: string[], forkCutoffs?: Re
   const perRepoAuthors: { repo: string; keys: string[] }[] = [];
 
   for (const dir of dirs) {
-    const name = dir.split('/').pop() ?? dir;
+    const name = basename(dir);   // not split('/'): on Windows the path uses backslashes
     // Fork-date cutoff for this repo, if the caller supplied one (keyed by basename).
     // Own-property lookup: a repo dir named like an Object.prototype key (`constructor`,
     // `toString`, …) would otherwise read an INHERITED function as the cutoff — a truthy bogus `--since`.

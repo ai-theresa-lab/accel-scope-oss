@@ -71,7 +71,7 @@ import { type LinkIndex, linkifyReport, loadLinkIndexFile } from './reportLinks.
 import { buildReportScope, injectReportScope, type CodeManifest, type ScopeEntry } from './reportScope.ts';
 import { backfillFindingsIndex } from './reportIndex.ts';
 import { renderAuditHtml } from './auditReportHtml.ts';
-import { persistableSource, rehydratePersistedSource, connectionCredentials, redactUrlCredentials } from './sources/persist.ts';
+import { persistableSource, rehydratePersistedSource, connectionCredentials, redactUrlCredentials, GITURL_CAP } from './sources/persist.ts';
 import { escapeHtml, envMcpSources, osvPublicOnly, measurePlaneIdentities, runBudget, effectiveRunBudget } from './run/shared.ts';
 import { loadAppSettings, saveRunBudget, SettingsError, rememberCredentials, setRememberCredentials, loadCredentials, saveCredentials } from './appSettings.ts';
 import { telemetryStatus, setTelemetryEnabled, markNoticeShown, telemetryNotice, TELEMETRY_FIELDS, examplePayload, track } from './telemetry.ts';
@@ -115,7 +115,6 @@ function runInActingOrg(session: Session, id: string): Run | undefined { return 
 
 // Max public-URL (giturl) scan targets per org — enforced BOTH at Connect (paste) and on profile Load, so a
 // seeded/imported profile can't fan out clones beyond this. Dedup is by fullName on both paths.
-const GITURL_CAP = 20;
 // A connected, read-only source. Raw credentials (token / mcpToken / saJson) live in memory and are stripped by
 // persistableSource before anything is written to disk.
 export interface Source {
@@ -983,7 +982,11 @@ function parseRepoSelection(raw: unknown, fallback: { fullName: string; branch?:
     const s = String(typeof r === 'string' ? r : ((r as { fullName?: string })?.fullName ?? '')).trim();
     const m = s.match(/^([\w.-]+\/[\w.-]+)(?:@([\w./-]+))?$/);
     if (!m || seen.has(m[1])) continue;
-    seen.add(m[1]); out.push({ fullName: m[1], branch: (typeof r === 'object' && (r as { branch?: string })?.branch) || m[2] || undefined });
+    // A branch (object form or "@branch" suffix) is word characters, '.', '/' and '-' only, never leading '-' or '..'.
+    const objBranch = typeof r === 'object' ? String((r as { branch?: unknown })?.branch ?? '').trim() : '';
+    const want = objBranch || m[2] || '';
+    const branch = want && /^[\w./-]+$/.test(want) && !want.startsWith('-') && !want.includes('..') ? want : undefined;
+    seen.add(m[1]); out.push({ fullName: m[1], branch });
   }
   return out.length ? out : fallback;
 }

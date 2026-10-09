@@ -10,7 +10,8 @@
 # Optional code intelligence (THERESA_CODEINTEL=1) uses repowise, an external AGPL-3.0 Python CLI that is invoked
 # strictly as a subprocess and never vendored. It is NOT installed by default; pass a pip requirement to include it:
 #   docker build --build-arg REPOWISE_SPEC='repowise @ git+https://github.com/repowise-dev/repowise@v0.28.0' -t waggle .
-FROM node:22.17-slim AS repowise-builder
+# Base image pinned by digest (node:22.17-slim) so a rebuild uses the exact same image; bump both FROM lines together.
+FROM node:22.17-slim@sha256:2fa754a9ba4d7adbd2a51d182eaabbe355c82b673624035a38c0d42b08724854 AS repowise-builder
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates git python3 python3-venv \
   && rm -rf /var/lib/apt/lists/*
@@ -22,7 +23,7 @@ RUN python3 -m venv /opt/repowise-venv \
        echo "repowise: not installed (no REPOWISE_SPEC) — code intelligence stays off" ; \
      fi
 
-FROM node:22.17-slim
+FROM node:22.17-slim@sha256:2fa754a9ba4d7adbd2a51d182eaabbe355c82b673624035a38c0d42b08724854
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates python3 \
   && rm -rf /var/lib/apt/lists/*

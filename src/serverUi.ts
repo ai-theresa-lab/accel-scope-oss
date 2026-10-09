@@ -2361,7 +2361,7 @@ ${REMEDIATION_MD_JS}
     // Spending
     h+='<section class="rd-card set-sec" id="setBudgetSec"><div class="set-sec-h"><h2>Spending</h2></div>'
       +'<div class="field"><label for="setBudget">Per-run cap (USD)</label><div class="set-row"><span class="set-dollar">$</span><input id="setBudget" type="number" min="1" step="1" inputmode="decimal" value="'+esc(cap!=null?String(cap):'20')+'" style="max-width:160px"><button type="button" class="btn honey" data-act="budget-save">Save cap</button><span class="mono set-msg">'+esc(state.budgetMsg||'')+'</span></div></div>'
-      +'<p class="hint">Each Quick Ask and Full Scan stops starting new work once it reaches this cap (default $20). Typical costs: Quick Ask ~$0.3–1, Full Scan ~$5–30.'+(eff===0?' The cap is currently not enforced (0 = unbounded).':(eff!=null&&cap!=null&&Number(eff)!==Number(cap)?' Enforced cap right now: '+esc(usd(eff))+'.':''))+'</p></section>';
+      +'<p class="hint">Each Quick Ask and Full Scan stops starting new work once it reaches this cap (default $20). Steps already running, and the final report and audit steps, still finish, so a run can end up to about a third over the cap. Typical costs: Quick Ask ~$0.3–1, Full Scan ~$5–30.'+(eff===0?' The cap is currently not enforced (0 = unbounded).':(eff!=null&&cap!=null&&Number(eff)!==Number(cap)?' Enforced cap right now: '+esc(usd(eff))+'.':''))+'</p></section>';
     // Connections: remember connector credentials across restarts (off = memory only)
     var remember=!!(s.connections&&s.connections.remember);
     h+='<section class="rd-card set-sec" id="setConnections"><div class="set-sec-h"><h2>Connections</h2><span class="sbadge '+(remember?'ok':'info')+'">'+(remember?'remembered':'memory only')+'</span></div>'
