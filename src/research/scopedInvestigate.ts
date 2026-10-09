@@ -9,7 +9,7 @@
 import { runAgent } from './agent.ts';
 import { agentBudgetCap, currentLedger, withBudgetNode } from './budget.ts';
 import { extractJson } from './json.ts';
-import { isResolvableEvidence, parseFileRef } from '../schema.ts';
+import { canonicalFileRef, isResolvableEvidence, parseFileRef } from '../schema.ts';
 import { withPlaneManifest, planeHints, type PlaneInfo } from './planeManifest.ts';
 import type { FlowSpec, FlowLane, FlowStep } from '../scopedTemplateHtml.ts';
 
@@ -396,14 +396,18 @@ export function isFileShapedRef(ref: string): boolean {
 
 export function gateScopedEvidence(d: ScopedDossier, root: string): { dossier: ScopedDossier; dropped: string[] } {
   const dropped: string[] = [];
-  const resolves = (ref: string) => isResolvableEvidence({ kind: 'file', ref }, { root });
-  const evidence = d.evidence.filter((e) => {
-    if (!isFileShapedRef(e.ref) || resolves(e.ref)) return true;
-    dropped.push(e.ref); return false;
+  // A ref that resolves only through a unique suffix match is rewritten to its full workspace path (canonicalFileRef),
+  // so the report links the right file instead of dropping a true cite that left out leading directories.
+  const canon = (ref: string): string | null => (isResolvableEvidence({ kind: 'file', ref }, { root }) ? canonicalFileRef(ref, root) ?? ref : null);
+  const evidence = d.evidence.flatMap((e) => {
+    if (!isFileShapedRef(e.ref)) return [e];
+    const c = canon(e.ref);
+    if (c !== null) return [c === e.ref ? e : { ...e, ref: c }];
+    dropped.push(e.ref); return [];
   });
   const tightening = d.tightening?.map((t) => {
     if (!t.files?.length) return t;
-    const files = t.files.filter((f) => { if (resolves(f)) return true; dropped.push(f); return false; });
+    const files = t.files.flatMap((f) => { const c = canon(f); if (c !== null) return [c]; dropped.push(f); return []; });
     const out: ScopedTightening = { ...t };
     if (files.length) out.files = files; else delete out.files;
     return out;
