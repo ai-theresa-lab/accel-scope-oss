@@ -1467,6 +1467,7 @@ const server = createServer(async (req, res) => {
           scope: r.kind === 'ask' ? r.askScope : r.scopeLabel, // ask runs: the scope label (chat bubble context); org runs: the user's Scope label (the run hero's subtitle)
           targetName: r.targetName,
           repoFilter: r.repoFilter,
+          localFilter: r.localFilter ?? null,   // the local folders a Full Scan read (the CLI reports them as the run's targets)
           giturlFilter: r.giturlFilter ?? null,   // The console opens an evidence permalink only into THIS run's own repos (repoFilter + giturlFilter)
           scopeRepos: [...(r.askRepos ?? []), ...(r.auditRepos ?? []), ...(r.codeManifest?.repos ?? [])].map((x) => x.fullName),   // report scope: a Quick Ask's / Rec audit's repos, for the same link check
           projectFilter: r.projectFilter,
