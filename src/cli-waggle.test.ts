@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CliError, currentStage, findingsSummary, parseArgs, remediationMarkdown, reportData, repoFullName, sseLogLines, untrusted } from './cli-waggle.ts';
+import { CliError, currentStage, findingsSummary, openQuestions, parseArgs, remediationMarkdown, reportData, repoFullName, sseLogLines, untrusted } from './cli-waggle.ts';
 
 test('parseArgs: command, positionals, repeated flags, = form and boolean flags', () => {
   const a = parseArgs(['scan', '--repo', 'a/b', '--repo=https://github.com/c/d', '--path', '.', '--full-rescan', 'extra']);
@@ -55,4 +55,13 @@ test('reportData + findingsSummary: fixed fields, bounded text, ruled-out rows s
   const md = remediationMarkdown('t', d!.findings as unknown[]);
   assert.match(md, /^# Remediation — t/);
   assert.match(md, /F-01/);
+});
+
+test('openQuestions lists the coverage gaps of every area, bounded', () => {
+  const data = { execution: { groups: [
+    { name: 'Software architecture', gaps: [{ concern: 'get() never deletes expired entries', why: 'needs an eval' }] },
+    { name: 'Security', gaps: [] },
+  ] } };
+  assert.deepEqual(openQuestions(data), [{ area: 'Software architecture', concern: 'get() never deletes expired entries', why: 'needs an eval' }]);
+  assert.deepEqual(openQuestions(null), []);
 });
