@@ -7,7 +7,8 @@
 import { areaHealthThemes, buildExecutionModel, executionGroups, executionGroupsFor, type ExecutionModel } from '../executionModel.ts';
 import { type Capability, type CapabilityAssignment, examinedCapabilityIds, parseCapabilities } from '../research/capabilities.ts';
 import { buildExecutionAppendix } from '../executionAppendix.ts';
-import { cpSync, existsSync, lstatSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { localCopyFilter } from '../requestGuard.ts';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -1602,23 +1603,16 @@ export async function executeOrgRun(run: Run, ctx: RunContext): Promise<void> {
       // org-map scanner DON'T follow symlinks, so a symlinked repo reads as an empty scope. We copy a
       // read-only snapshot (keeping .git for history, skipping dep/build bloat); the source is untouched.
       const picked = (local.localRepos ?? []).filter((r) => run.localFilter!.includes(r.path));
-      const SKIP = /(^|\/)(node_modules|\.venv|venv|env|__pycache__|\.pytest_cache|\.mypy_cache|\.ruff_cache|dist|build|\.next|\.turbo|\.gradle|target)(\/|$)/;
       for (const r of picked) {
         let name = r.name, n = 2;                                  // unique dir name (folders can share a basename)
         while (existsSync(join(tmp, name))) name = `${r.name}-${n++}`;
         const dest = join(tmp, name);
         ctx.log(run, `copying local folder ${name} (read-only snapshot, skipping deps) …`);
         try {
-          cpSync(r.path, dest, { recursive: true, dereference: false, filter: (src) => {
-            // test SKIP RELATIVE to the repo root (else a PARENT dir named env/build/target/… on the
-            // user's path voids the whole copy); and DROP symlinks (a link escaping the tree —
-            // e.g. → ~/.ssh — must never enter the workspace, even though agents don't follow links).
-            if (src !== r.path && SKIP.test(src.slice(r.path.length))) return false;
-            try { if (lstatSync(src).isSymbolicLink()) return false; } catch { /* keep */ }
-            return true;
-          } });
+          // Shared filter: skips dep/build dirs, symlinks and local secrets (.env, private keys, the data dir).
+          cpSync(r.path, dest, { recursive: true, dereference: false, filter: localCopyFilter(r.path) });
           // never silently truncate: a copy that produced an empty tree is a bad path, not a clean repo
-          if (!readdirSync(dest).length) { unreachable.push({ name: r.name, kind: 'folder', reason: 'copied empty (bad path?)' }); ctx.log(run, `  ⚠ ${r.name} copied EMPTY — skipped (bad path?)`); rmSync(dest, { recursive: true, force: true }); }
+          if (!existsSync(dest) || !readdirSync(dest).length) { unreachable.push({ name: r.name, kind: 'folder', reason: 'copied empty (bad path?)' }); ctx.log(run, `  ⚠ ${r.name} copied EMPTY — skipped (bad path?)`); rmSync(dest, { recursive: true, force: true }); }
           else {
             ok++;
             // Cheap fingerprint (file count + bytes) so a RESUME can detect the folder changed since the

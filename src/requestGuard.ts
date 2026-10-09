@@ -1,5 +1,6 @@
-// Request and file guards for the single-user console (pure; unit-tested in requestGuard.test.ts).
+// Request and file guards for the single-user console (unit-tested in requestGuard.test.ts).
 import type { IncomingMessage } from 'node:http';
+import { lstatSync } from 'node:fs';
 import { basename, join, resolve as resolvePath } from 'node:path';
 
 // The console has no login, so the server itself refuses the two ways a web page the user visits could drive it:
@@ -40,4 +41,20 @@ export function isLocalSecretPath(src: string): boolean {
   if (LOCAL_SECRET_FILE.test(basename(src))) return true;
   const data = resolvePath(process.env.THERESA_DATA_DIR || join(process.cwd(), '.data'));
   return resolvePath(src) === data;
+}
+
+// Dep/build dirs the agents never need to read; skipping them keeps a multi-folder scan fast.
+const LOCAL_COPY_SKIP = /(^|\/)(node_modules|\.venv|venv|env|__pycache__|\.pytest_cache|\.mypy_cache|\.ruff_cache|dist|build|\.next|\.turbo|\.gradle|target)(\/|$)/;
+// The cpSync filter for every copy of a local folder into a scan workspace (Quick Ask / report chat in server.ts,
+// Full Scan in run/execute-org-run.ts). One predicate, so the secret rule cannot be missing from one path again.
+// SKIP is tested relative to `root` (a parent dir named env/build/... must not void the copy), with '\\' turned into
+// '/' so it also matches on Windows. The secret check covers the root too: a connected data dir copies nothing.
+// Symlinks are dropped because a link escaping the tree (e.g. to ~/.ssh) must never enter the workspace.
+export function localCopyFilter(root: string): (src: string) => boolean {
+  return (src) => {
+    if (src !== root && LOCAL_COPY_SKIP.test(src.slice(root.length).replace(/\\/g, '/'))) return false;
+    if (isLocalSecretPath(src)) return false;
+    try { if (lstatSync(src).isSymbolicLink()) return false; } catch { /* keep */ }
+    return true;
+  };
 }

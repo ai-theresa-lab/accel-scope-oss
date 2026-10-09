@@ -12,7 +12,8 @@ Notes for coding agents working on this repository. Humans: see [CONTRIBUTING.md
   read-only tool allowlist.
 - **Secrets**: API keys come from `src/apiKeys.ts`; connection credentials are stripped by `persistableSource` and
   only written to the opt-in 0600 files. Never log, persist into `state.json`, render into a report or send in telemetry
-  any key, token or credential.
+  any key, token or credential. Every copy of a local folder into a scan workspace uses `localCopyFilter`
+  (`src/requestGuard.ts`), which leaves out `.env` files, private keys and the data dir.
 - **Telemetry** is a public contract: the payload fields are listed in `src/telemetry.ts`,
   `telemetry-collector/schema.mjs` and the README; change all three together.
 - **English only** in code, prompts, UI, reports, tests and docs.
