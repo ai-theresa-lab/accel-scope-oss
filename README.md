@@ -11,7 +11,7 @@
 
 ![Waggle console](docs/screenshot.png)
 
-**Contents:** [Overview](#overview) · [Method](#method) · [Quick start](#quick-start) · [Usage](#usage) · [Expert lenses](#expert-lenses) · [Connectors](#connectors) · [Privacy and telemetry](#privacy-and-telemetry) · [Limitations](#limitations-and-threats-to-validity) · [Contributors](#contributors) · [Citation](#citation)
+**Contents:** [Overview](#overview) · [Method](#method) · [Quick start](#quick-start) · [Usage](#usage) · [Command line](#command-line) · [Expert lenses](#expert-lenses) · [Connectors](#connectors) · [Privacy and telemetry](#privacy-and-telemetry) · [Limitations](#limitations-and-threats-to-validity) · [Contributors](#contributors) · [Citation](#citation)
 
 ## Overview
 
@@ -100,6 +100,19 @@ docker run --rm -p 127.0.0.1:4317:4317 -v waggle-data:/data -e ANTHROPIC_API_KEY
 | **Full Scan** | The whole method above, over the repos and data planes you select. | $5–30 |
 | **Incremental re-scan** | Scanning the same targets again reuses everything the changes did not touch and reports what is new, fixed or still open. | a fraction of a Full Scan |
 | **Memory** | Durable, editable, revertable notes about your projects that later runs recall as prior context. | — |
+
+## Command line
+
+`waggle` runs the same pipeline without the browser — for scripts, CI and the [Claude Code skill](https://github.com/ai-theresa-lab/ai-theresa-waggle-skill). It starts a local server in the background (data in `~/.waggle/data`, or `THERESA_DATA_DIR`), so a run started here also appears in the console.
+
+```bash
+node bin/waggle.mjs scan --repo https://github.com/<owner>/<repo> --brief "is our auth safe?"   # → {"id": "rs_…"}
+node bin/waggle.mjs wait rs_… --timeout 540        # poll until done (repeat while "timedOut": true)
+node bin/waggle.mjs result rs_… --out ./waggle-out  # findings.json, REMEDIATION.md and both HTML reports
+node bin/waggle.mjs ask --path . --question "Where is monthly revenue computed?"
+```
+
+Every command prints one JSON object. Other commands: `doctor`, `status`, `stop`, `budget`, `telemetry`, `server start|stop|status` (`node bin/waggle.mjs help`). Text that comes from scanned code is marked `untrusted` in the output.
 
 ## API keys and cost
 
