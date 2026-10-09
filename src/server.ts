@@ -11,11 +11,11 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { randomBytes, createHash } from 'node:crypto';
-import { mkdtempSync, rmSync, readFileSync, writeFileSync, mkdirSync, existsSync, statSync, realpathSync, readdirSync, lstatSync, cpSync } from 'node:fs';
+import { mkdtempSync, rmSync, readFileSync, writeFileSync, mkdirSync, existsSync, statSync, realpathSync, readdirSync, cpSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, basename, dirname, resolve as resolvePath } from 'node:path';
 import { renderApp } from './serverUi.ts';
-import { requestGuard, isLocalSecretPath } from './requestGuard.ts';
+import { requestGuard, localCopyFilter } from './requestGuard.ts';
 import { renderFindingsHtml } from './reportHtml.ts';
 import { research } from './research/orchestrate.ts';
 import type { DerivedDimension, CoverageNote } from './research/deriveDimensions.ts';
@@ -991,9 +991,7 @@ function parseRepoSelection(raw: unknown, fallback: { fullName: string; branch?:
   return out.length ? out : fallback;
 }
 
-// Dep/build dirs the agent never needs to read — skipped on the local-copy path so a multi-repo scan stays fast.
-const REPO_COPY_SKIP = /(^|\/)(node_modules|\.venv|venv|env|__pycache__|\.pytest_cache|\.mypy_cache|\.ruff_cache|dist|build|\.next|\.turbo|\.gradle|target)(\/|$)/;
-// Copy ONE local repo into `workspace` as a read-only snapshot, skipping dep/build dirs and symlinks (the
+// Copy ONE local repo into `workspace` as a read-only snapshot, skipping dep/build dirs, local secrets and symlinks (the
 // agents' Glob/Grep don't follow symlinks, and a link escaping the tree — e.g. → ~/.ssh — must never enter the
 // workspace). Returns the dest path on success, or null on a bad/empty copy. Same staging the org audit uses,
 // so accel-mini scans local folders identically.
@@ -1001,13 +999,8 @@ function copyRepoSnapshot(workspace: string, repo: { path: string; name: string 
   const { dir: dest, name } = uniqueChildDir(workspace, repo.name);
   log(`copying local folder ${name} (read-only snapshot, skipping deps) …`);
   try {
-    cpSync(repo.path, dest, { recursive: true, dereference: false, filter: (src) => {
-      if (src !== repo.path && REPO_COPY_SKIP.test(src.slice(repo.path.length))) return false;  // SKIP relative to repo root
-      if (src !== repo.path && isLocalSecretPath(src)) return false;
-      try { if (lstatSync(src).isSymbolicLink()) return false; } catch { /* keep */ }
-      return true;
-    } });
-    if (!readdirSync(dest).length) { log(`  ⚠ ${repo.name} copied EMPTY — skipped (bad path?)`); rmSync(dest, { recursive: true, force: true }); return null; }
+    cpSync(repo.path, dest, { recursive: true, dereference: false, filter: localCopyFilter(repo.path) });
+    if (!existsSync(dest) || !readdirSync(dest).length) { log(`  ⚠ ${repo.name} copied EMPTY — skipped (bad path?)`); rmSync(dest, { recursive: true, force: true }); return null; }
     return dest;
   } catch (e) { log(`  skipped ${repo.name}: ${e instanceof Error ? e.message : String(e)}`); return null; }
 }
