@@ -138,7 +138,7 @@ test('digest is hard-capped for pathological workspaces', () => {
   } finally { rmSync(ws, { recursive: true, force: true }); }
 });
 
-test('stripEscapingSymlinks removes escaping/broken links + intra-workspace DIR links, keeps intra-workspace FILE links', () => {
+test('stripEscapingSymlinks removes escaping/broken links + intra-workspace DIR links, keeps intra-workspace FILE links', { skip: process.platform === 'win32' ? 'creating symlinks needs Developer Mode or admin rights on Windows' : false }, () => {
   const ws = mkdtempSync(join(tmpdir(), 'codeintel-sym-'));
   const root = realpathSync(ws);
   try {

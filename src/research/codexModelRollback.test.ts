@@ -10,7 +10,7 @@ import { join } from 'node:path';
 // htmlWriter is imported DYNAMICALLY, inside the test, because CODEX_MODEL is resolved at module load — the env has to
 // be set first. Do NOT add a static import of ./htmlWriter.ts to this file.
 
-test('THERESA_CODEX_MODEL rolls the codex model back — env only, no code change', async () => {
+test('THERESA_CODEX_MODEL rolls the codex model back — env only, no code change', { skip: process.platform === 'win32' ? 'the fake codex is a POSIX shell script' : false }, async () => {
   process.env.THERESA_CODEX_MODEL = 'gpt-5.5';
   const { CODEX_MODEL, authorHtmlFile } = await import('./htmlWriter.ts');
   assert.equal(CODEX_MODEL, 'gpt-5.5', 'the override must win over the gpt-5.6 default');

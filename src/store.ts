@@ -3,7 +3,7 @@
 // THERESA_DATA_DIR at a mounted volume. Reports are
 // large HTML, so they live as individual files, not inside the state blob.
 
-import { readFileSync, writeFileSync, mkdirSync, renameSync, existsSync, rmSync, statSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, renameSync, existsSync, rmSync, statSync, readdirSync, chmodSync } from 'node:fs';
 import { join } from 'node:path';
 
 const DIR = process.env.THERESA_DATA_DIR || join(process.cwd(), '.data');
@@ -14,8 +14,12 @@ const STATE = join(DIR, 'state.json');
 // beside reports/ (lineage/, org-findings/: src/scanLineage.ts, src/orgFindings.ts). Resolved once at load, like DIR.
 export function dataDir(): string { return DIR; }
 
+// The data dir holds run history, reports and chats (code-derived content), so on POSIX it is private to the current
+// user (0700; state and chats are written 0600). On Windows it inherits the parent folder's ACL — under the user
+// profile by default, which is already private to that user.
 export function ensureStore(): void {
-  mkdirSync(REPORTS, { recursive: true });
+  mkdirSync(REPORTS, { recursive: true, mode: 0o700 });
+  if (process.platform !== 'win32') { try { chmodSync(DIR, 0o700); } catch { /* not the owner: leave as is */ } }
 }
 
 export function loadState(): any {
@@ -33,7 +37,7 @@ export function stateMtimeMs(): number {
 export function saveState(state: unknown): void {
   try {
     const tmp = STATE + '.tmp';
-    writeFileSync(tmp, JSON.stringify(state));
+    writeFileSync(tmp, JSON.stringify(state), { mode: 0o600 });
     renameSync(tmp, STATE);
   } catch (e) {
     // best-effort; never crash the request path on a save failure — but a SILENT failure makes the
@@ -48,7 +52,7 @@ export function saveState(state: unknown): void {
 const CHATS = join(DIR, 'chats.json');
 export function loadChats(): any { try { return JSON.parse(readFileSync(CHATS, 'utf8')); } catch { return null; } }
 export function saveChats(blob: unknown): void {
-  try { const tmp = CHATS + '.tmp'; writeFileSync(tmp, JSON.stringify(blob)); renameSync(tmp, CHATS); } catch { /* best-effort */ }
+  try { const tmp = CHATS + '.tmp'; writeFileSync(tmp, JSON.stringify(blob), { mode: 0o600 }); renameSync(tmp, CHATS); } catch { /* best-effort */ }
 }
 
 export function saveReport(runId: string, html: string): void {

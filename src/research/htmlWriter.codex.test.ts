@@ -27,7 +27,7 @@ async function withPath(dir: string, fn: () => Promise<void>): Promise<void> {
 const scratchDir = () => mkdtempSync(join(tmpdir(), 'codex-scratch-'));
 const noop = () => {};
 
-test('codex branch: wrote the file + exit 0 → ok (no fallback)', async () => {
+test('codex branch: wrote the file + exit 0 → ok (no fallback)', { skip: process.platform === 'win32' ? 'the fake codex is a POSIX shell script' : false }, async () => {
   const bin = fakeCodexDir(`printf '<html>drafted</html>' > report.html\nexit 0`);
   const scratch = scratchDir();
   try {
@@ -63,7 +63,7 @@ test('codex branch: codex NOT on PATH → ok:false (spawn ENOENT is resolved, no
   } finally { rmSync(empty, { recursive: true, force: true }); rmSync(scratch, { recursive: true, force: true }); }
 });
 
-test('codex branch: exit 0 but NOTHING authored → ok:true, so the existsSync half of the guard is load-bearing', async () => {
+test('codex branch: exit 0 but NOTHING authored → ok:true, so the existsSync half of the guard is load-bearing', { skip: process.platform === 'win32' ? 'the fake codex is a POSIX shell script' : false }, async () => {
   const bin = fakeCodexDir('exit 0');
   const scratch = scratchDir();
   try {
@@ -75,7 +75,7 @@ test('codex branch: exit 0 but NOTHING authored → ok:true, so the existsSync h
   } finally { rmSync(bin, { recursive: true, force: true }); rmSync(scratch, { recursive: true, force: true }); }
 });
 
-test('codex round reports usage-derived cost to onCost', async () => {
+test('codex round reports usage-derived cost to onCost', { skip: process.platform === 'win32' ? 'the fake codex is a POSIX shell script' : false }, async () => {
   // codex exec --json streams turn.completed events; parseUsage sums them. Emit one so the budget path is covered.
   const bin = fakeCodexDir(`printf '<html>x</html>' > report.html\necho '{"type":"turn.completed","usage":{"input_tokens":1000,"output_tokens":100}}'\nexit 0`);
   const scratch = scratchDir();
