@@ -177,8 +177,17 @@ async function runningServer(): Promise<ServerInfo | null> {
 async function startServer(): Promise<ServerInfo> {
   const existing = await runningServer();
   if (existing) {
-    if (existing.version !== VERSION) process.stderr.write(`waggle: a v${existing.version} server is running; this CLI is v${VERSION}. Run "waggle server stop" when no run is active, then retry.\n`);
-    return existing;
+    if (existing.version === VERSION) return existing;
+    // A server from another engine version (e.g. after an upgrade): replace it, unless a run is still going.
+    const state = await api(existing.port, '/api/state').catch(() => null);
+    const busy = ((state?.runs ?? []) as { status?: string }[]).some((r) => r.status === 'running' || r.status === 'queued');
+    if (busy) {
+      process.stderr.write(`waggle: a v${existing.version} server is running a scan; using it until the scan ends (this CLI is v${VERSION}).\n`);
+      return existing;
+    }
+    process.stderr.write(`waggle: restarting the server on v${VERSION} (was v${existing.version}).\n`);
+    await stopServer();
+    await new Promise((r) => setTimeout(r, 1000));
   }
   const dir = dataDir();
   mkdirSync(dir, { recursive: true, mode: 0o700 });
@@ -360,7 +369,7 @@ async function main(argv: string[]): Promise<unknown> {
     }
     case 'status': case 'wait': {
       const id = a.positional[0]; if (!id) throw new CliError(`${a.command} RUN`);
-      const srv = await runningServer(); if (!srv) throw new CliError('the Waggle server is not running ("waggle server start")');
+      const srv = await startServer();
       const logN = Math.min(50, Math.max(0, Number(one(a, 'log') ?? 8)));
       if (a.command === 'status') return statusOf(srv.port, id, logN);
       const deadline = Date.now() + Math.max(5, Number(one(a, 'timeout') ?? 540)) * 1000;
@@ -372,7 +381,7 @@ async function main(argv: string[]): Promise<unknown> {
     }
     case 'result': {
       const id = a.positional[0]; if (!id) throw new CliError('result RUN [--out DIR]');
-      const srv = await runningServer(); if (!srv) throw new CliError('the Waggle server is not running ("waggle server start")');
+      const srv = await startServer();
       const { run } = await runRecord(srv.port, id);
       if (run.status !== 'complete') throw new CliError(`run ${run.id} is ${run.status}, not complete`);
       const out = resolve(one(a, 'out') ?? join(dataDir(), 'results', run.id));
@@ -406,7 +415,7 @@ async function main(argv: string[]): Promise<unknown> {
     }
     case 'stop': {
       const id = a.positional[0]; if (!id) throw new CliError('stop RUN');
-      const srv = await runningServer(); if (!srv) throw new CliError('the Waggle server is not running');
+      const srv = await startServer();
       await api(srv.port, `/api/runs/${encodeURIComponent(id)}/stop`, {});
       return { id, stopRequested: true };
     }
