@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CliError, currentStage, findingsSummary, openQuestions, parseArgs, remediationMarkdown, reportData, repoFullName, sseLogLines, untrusted } from './cli-waggle.ts';
+import { CliError, currentStage, findingsSummary, openQuestions, parseArgs, runTargets, remediationMarkdown, reportData, repoFullName, sseLogLines, untrusted } from './cli-waggle.ts';
 
 test('parseArgs: command, positionals, repeated flags, = form and boolean flags', () => {
   const a = parseArgs(['scan', '--repo', 'a/b', '--repo=https://github.com/c/d', '--path', '.', '--full-rescan', 'extra']);
@@ -64,4 +64,9 @@ test('openQuestions lists the coverage gaps of every area, bounded', () => {
   ] } };
   assert.deepEqual(openQuestions(data), [{ area: 'Software architecture', concern: 'get() never deletes expired entries', why: 'needs an eval' }]);
   assert.deepEqual(openQuestions(null), []);
+});
+
+test('runTargets merges repository selections and lists local folders', () => {
+  assert.deepEqual(runTargets({ giturlFilter: ['a/b'], repoFilter: ['a/b', 'c/d'], localFilter: ['/w/x'] }), { repos: ['a/b', 'c/d'], folders: ['/w/x'] });
+  assert.deepEqual(runTargets({}), { repos: [], folders: [] });
 });
