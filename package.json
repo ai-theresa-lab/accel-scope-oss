@@ -1,6 +1,6 @@
 {
   "name": "waggle",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Self-hosted AI code and data auditor: point it at your repos and data, get an evidence-backed report and a fix plan your coding agent can run.",
   "license": "Apache-2.0",
   "homepage": "https://aitheresa.ai/diagnosis/",
@@ -9,6 +9,9 @@
     "url": "https://github.com/ai-theresa-lab/ai-theresa-waggle.git"
   },
   "type": "module",
+  "bin": {
+    "waggle": "bin/waggle.mjs"
+  },
   "engines": {
     "node": ">=22.7"
   },
@@ -16,6 +19,7 @@
     "prestart": "node scripts/check-node.mjs",
     "start": "node --disable-warning=ExperimentalWarning --experimental-strip-types src/server.ts",
     "serve": "node --disable-warning=ExperimentalWarning --experimental-strip-types src/server.ts",
+    "waggle": "node bin/waggle.mjs",
     "analyze": "node --experimental-strip-types src/cli.ts",
     "analyze:org": "node --experimental-strip-types src/cli-org.ts",
     "test": "node --experimental-strip-types --test \"src/**/*.test.ts\"",
